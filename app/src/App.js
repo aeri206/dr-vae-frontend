@@ -6,11 +6,10 @@ import MainView from './components/MainView';
 
 function App() {
 
-
-
   const size   = 400;
   const radius = 3;
   const margin = 10;
+  const methods = ["umap", "tsne", "isomap", "densmap", "lle"];
 
   return (
     <div className="App">
@@ -29,7 +28,7 @@ function App() {
             height={size * 0.35 - 20}
           />
           <ExampleView
-            width={size * 1.32}
+            width={size * 1.72}
             height={size * 0.35 - 20}
           />
         </div>
@@ -37,6 +36,7 @@ function App() {
           size={size} 
           radius={radius}
           margin={margin}
+          methods={methods}
         />
       </div>
       <footer className="App-footer">

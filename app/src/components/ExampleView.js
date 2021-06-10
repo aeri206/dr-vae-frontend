@@ -4,6 +4,8 @@ import "../css/mainview.css";
 
 const ExampleView = (props) => {
 
+	
+
 	return (
 		<div 
 			className="functionViews exampleView"
@@ -12,7 +14,6 @@ const ExampleView = (props) => {
 				height: props.height
 			}}
 		>
-			sads
 		</div>
 	)
 }
