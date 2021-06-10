@@ -9,10 +9,18 @@ const ExampleView = (props) => {
 	const methods = props.methods;	
 	const pointNum = props.pointNum;
 	const radius = 8;
+
+	const method2Idx = {}
+	console.log(methods)
+	methods.forEach((d, i) => { method2Idx[d] = i; });
+
+	console.log(method2Idx)
 	
 	const exampleSize = props.height - props.margin * 2;
 	const labelColors = props.labelColors;
+	const embCategoryColors = props.embCategoryColors;
 
+	const scatterplots = [];
 
 	const labelData = require("../json/label.json");
 	const exampleData = methods.map(d => { 
@@ -30,7 +38,6 @@ const ExampleView = (props) => {
 		const color = d3.rgb(labelColors(idx));
 		return [color.r, color.g, color.b];
 	});
-	console.log(colorData)
 
 	useEffect(() => {
 		methods.forEach((method, i) => {
@@ -42,9 +49,32 @@ const ExampleView = (props) => {
 				borderColor: new Array(pointNum).fill([0, 0, 0]),
 				radius: new Array(pointNum).fill(radius),
 			}
-			const currentScatterplot = new Scatterplot(data, document.getElementById(method + "Canvas"));
+			const currentScatterplot = new Scatterplot(data, document.getElementById("canvas" + method));
+			scatterplots.push(currentScatterplot);
 		});
 	}, [])
+
+
+	function mouseoverExampleView(e) {
+		const id = e.target.id.slice(6);
+		e.target.style.border = "3px solid black";
+
+		d3.select("#barchart")
+		  .select("#" + id + "rect")
+			.attr("fill", d3.rgb(embCategoryColors(method2Idx[id])).darker(2))
+			.attr("stroke-width", "3px")
+			.attr("stroke", "black")
+	}
+
+	function mouseoutExampleView(e) {
+		const id = e.target.id.slice(6);
+		e.target.style.border = "1px solid black";
+
+		d3.select("#barchart")
+		  .select("#" + id + "rect")
+			.attr("stroke-width", "0px")
+			.attr("fill", d3.rgb(embCategoryColors(method2Idx[id])))
+	}
 
 
 
@@ -64,7 +94,7 @@ const ExampleView = (props) => {
 					return (
 						<div key={i} style={{fontSize: "13px", margin: props.margin}}>
 							<canvas
-								id={d + "Canvas"}
+								id={"canvas" + d}
 								style={{
 									width: exampleSize,
 									height: exampleSize,
@@ -72,6 +102,8 @@ const ExampleView = (props) => {
 								}}
 								width={exampleSize * 2}
 								height={exampleSize * 2}
+								onMouseOver={mouseoverExampleView}
+								onMouseOut={mouseoutExampleView}
 							/>
 							<div style={{position: "relative", top: "-20px", left: "5px"}}>
 							{d}

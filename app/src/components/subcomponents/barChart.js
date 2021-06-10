@@ -11,16 +11,17 @@ export class barChart {
 		this.methods = methods;
 
 		this.svg = d3.select(this.dom)
+								 .attr("id", "barchart")
 								 .attr("width", width + margin * 2)
 								 .attr("height", height + margin * 3)
 								 .append("g")
 								 .attr("transform", "translate(20, 20)");
 
-		this.rectSvg = this.svg.append("g");
+		this.rectSvg = this.svg.append("g").attr("id", "rectSvg");
 		this.textSvg = this.svg.append("g");
 		this.axisSvg = this.svg.append("g");
 
-		this.color = d3.scaleOrdinal(d3.schemeCategory10);
+		this.color = d3.scaleOrdinal(d3.schemeDark2);
 		
 	}
 
@@ -36,6 +37,7 @@ export class barChart {
 				        .data(values)
 								.enter()
 								.append("rect")
+								.attr("id", (d, i) => this.methods[i] + "rect")
 								.attr("width", barWidth)
 								.attr("height", d => scale(d))
 								.attr("transform", (d, i) => "translate(" + (i * (barWidth + barMargin) + barMargin) + ", "  + (this.height - scale(d)) + ")")

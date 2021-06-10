@@ -13,6 +13,7 @@ function App() {
   const margin = 10;
   const methods = ["umap", "tsne", "isomap", "densmap", "lle"];
   const labelColors = d3.scaleOrdinal(d3.schemeCategory10);
+  const embCategoryColors = d3.scaleOrdinal(d3.schemeDark2)
   const pointNum = 400;
 
   return (
@@ -37,6 +38,7 @@ function App() {
             margin={margin}
             methods={methods}
             labelColors={labelColors}
+            embCategoryColors={embCategoryColors}
             pointNum={pointNum}
           />
         </div>
@@ -45,11 +47,9 @@ function App() {
           radius={radius}
           margin={margin}
           methods={methods}
+          embCategoryColors={embCategoryColors}
         />
       </div>
-      <footer className="App-footer">
-        
-      </footer>
     </div>
   );
 }
