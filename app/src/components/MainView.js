@@ -41,6 +41,9 @@ const MainView = (props) => {
           margin: margin
         }}
       >
+        <div style={{marginBottom: 10}}>
+          Latent Space Exploration
+        </div>
         {latentValArray.map((_, i) => 
            (<div className="hparam" key={i}>
               <div className="hname">Val {i}</div> 
@@ -55,9 +58,10 @@ const MainView = (props) => {
               />
            </div>)
         )}
+ 
         <div style={{display: "flex"}}>
           <div style={{width: size * 0.5, height: size * 0.5}}>
-            안녕안녕
+            
           </div>
           <canvas
             ref={latentViewRef}

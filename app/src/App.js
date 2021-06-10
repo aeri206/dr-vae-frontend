@@ -15,7 +15,12 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        Dimensionality Reduction Explorer utilizing VAE
+        <div>
+        Dimensionality Reduction Explorer utilizing VAE 
+          </div>
+        <div className="us">
+           (Human-Computer Interaction 2021 Sprint Team 4)
+        </div>
       </header>
       <div id="body">
         <div style={{display: "flex"}}>
@@ -24,7 +29,7 @@ function App() {
             height={size * 0.35 - 20}
           />
           <ExampleView
-            width={size * 1.2}
+            width={size * 1.32}
             height={size * 0.35 - 20}
           />
         </div>
@@ -35,7 +40,7 @@ function App() {
         />
       </div>
       <footer className="App-footer">
-        Human-Computer Interaction 2021 Sprint Team 4
+        
       </footer>
     </div>
   );
