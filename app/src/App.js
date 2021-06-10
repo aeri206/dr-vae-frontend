@@ -11,7 +11,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        VAE for Dimensionality Reduction Explorer
+        Dimensionality Reduction Explorer utilizing VAE
       </header>
       <div id="body">
         <div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { scatterplotStyle } from './subcomponents/styles';
+import  "../css/mainview.css"
 
 
 const MainView = (props) => {
@@ -31,7 +32,7 @@ const MainView = (props) => {
 
 
   return (
-     <div style={{display: 'flex'}}>
+     <div className="functionViews" style={{width: size * 2.1}}>
       <div 
         id={"latentview"}
         style={{
