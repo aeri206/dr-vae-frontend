@@ -29,6 +29,12 @@ div.progress {
 	margin-top: 5px;
 }
 
+div.beforeprogress {
+	font-size: 15px;
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
 progress.file {
 	margin-top: 5px;
 }

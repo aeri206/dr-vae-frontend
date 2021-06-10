@@ -3,13 +3,16 @@ import '../css/fileupload.css'
 
 const FileUpload = (props) => {
 	return (
-		<div className={"fileupload"}style={{width: props.size - 20, height: props.size * 0.35 - 20}}>
+		<div className={"fileupload"}style={{width: props.width, height: props.height}}>
 			<div>
 				<button className={"fileUploadButton"}>Default dataset</button>
 				<button className={"fileUploadButton"}>Import File</button>
 				<input defaultValue={"browse file..."}/>
 			</div>
 			<div>
+				<div className="beforeprogress">
+					Current Default dataset: MNIST 
+				</div>
 				<div className={"progressDiv"}>
 					<div className="progress">
 						Dataset Generation

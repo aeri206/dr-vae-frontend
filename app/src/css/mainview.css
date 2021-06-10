@@ -5,3 +5,10 @@ div.functionViews {
 	display: flex;
 	margin-top: 10px;
 }
+
+div.exampleView {
+	/* margin: 10px; */
+	margin-top: 0px;
+	margin-left: 10px;
+	padding: 10px;
+}

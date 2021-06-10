@@ -1,9 +1,13 @@
 import './App.css';
+import ExampleView from './components/ExampleView';
 import FileUpload from './components/FileUpload';
 import './components/MainView';
 import MainView from './components/MainView';
 
 function App() {
+
+
+
   const size   = 400;
   const radius = 3;
   const margin = 10;
@@ -14,9 +18,14 @@ function App() {
         Dimensionality Reduction Explorer utilizing VAE
       </header>
       <div id="body">
-        <div>
+        <div style={{display: "flex"}}>
           <FileUpload
-            size={size * 0.8}
+            width={size * 0.8 - 20}
+            height={size * 0.35 - 20}
+          />
+          <ExampleView
+            width={size * 1.2}
+            height={size * 0.35 - 20}
           />
         </div>
         <MainView
