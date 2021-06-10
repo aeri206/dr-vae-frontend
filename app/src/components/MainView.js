@@ -10,7 +10,8 @@ const MainView = (props) => {
   const size   = props.size;
   const margin = props.margin;
 
-  const splotRef = useRef(null);
+  const mainViewRef = useRef(null);
+  const latentViewRef = useRef(null);
 
   const latentValNum = 5;
   
@@ -24,8 +25,9 @@ const MainView = (props) => {
   return (
      <div style={{display: 'flex'}}>
       <div 
+        id={"latentview"}
         style={{
-          width: size * 0.7,
+          width: size,
           height: size,
           margin: margin
         }}
@@ -42,15 +44,29 @@ const MainView = (props) => {
               />
            </div>)
         )}
+        <div style={{display: "flex"}}>
+          <div style={{width: size * 0.5, height: size * 0.5}}>
+            안녕안녕
+          </div>
+          <canvas
+            ref={latentViewRef}
+            width={size * 2}
+            height={size * 2}
+            style={scatterplotStyle(size * 0.5)}
+          ></canvas>
+        </div>
       </div>
       <div
+        id={"mainview"}
         style={{
           width: size,
-          height: size
+          height: size,
+          margin: margin
         }}
       >
+
         <canvas
-          ref={splotRef}
+          ref={mainViewRef}
           width={size * 4}
           height={size * 4}
           style={scatterplotStyle(size)}

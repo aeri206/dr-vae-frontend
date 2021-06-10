@@ -3,6 +3,5 @@ export function scatterplotStyle(size) {
     border: "1px black solid",
     width: size,
     height: size,
-    position: "absolute"
   };
 }
