@@ -1,4 +1,5 @@
 import './App.css';
+import FileUpload from './components/FileUpload';
 import './components/MainView';
 import MainView from './components/MainView';
 
@@ -13,6 +14,11 @@ function App() {
         VAE for Dimensionality Reduction Explorer
       </header>
       <div id="body">
+        <div>
+          <FileUpload
+            size={size * 0.8}
+          />
+        </div>
         <MainView
           size={size} 
           radius={radius}

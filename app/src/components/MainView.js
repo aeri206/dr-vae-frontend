@@ -13,13 +13,21 @@ const MainView = (props) => {
   const mainViewRef = useRef(null);
   const latentViewRef = useRef(null);
 
-  const latentValNum = 5;
-  
-  const latentValArray = new Array(latentValNum).fill(0);
 
   useEffect(() => {
 
   }, []);
+
+
+
+  // NOTE about latent variables
+  const latentValNum = 5;
+  const latentValArray = new Array(latentValNum).fill(0);
+
+  function updateLatentValue(e) {
+    const latentNum = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
+    console.log(latentNum)
+  }
 
 
   return (
@@ -33,14 +41,16 @@ const MainView = (props) => {
         }}
       >
         {latentValArray.map((_, i) => 
-           (<div className="hparam">
-              <div classNmae="hname" style={{width: 50}}>Val {i}</div> 
+           (<div className="hparam" key={i}>
+              <div className="hname">Val {i}</div> 
               <input 
-                  type="range"
-                  min={1} 
-                  max={100}
-                  defaultValue={50} 
-                  className="slider"
+                id={"latent" + i}
+                type="range"
+                min={1} 
+                max={100}
+                defaultValue={50} 
+                className="slider"
+                onChange={updateLatentValue}
               />
            </div>)
         )}
