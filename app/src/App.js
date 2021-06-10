@@ -4,12 +4,16 @@ import FileUpload from './components/FileUpload';
 import './components/MainView';
 import MainView from './components/MainView';
 
+import * as d3 from "d3";
+
 function App() {
 
   const size   = 400;
   const radius = 3;
   const margin = 10;
   const methods = ["umap", "tsne", "isomap", "densmap", "lle"];
+  const labelColors = d3.scaleOrdinal(d3.schemeCategory10);
+  const pointNum = 400;
 
   return (
     <div className="App">
@@ -25,11 +29,15 @@ function App() {
         <div style={{display: "flex"}}>
           <FileUpload
             width={size * 0.8 - 20}
-            height={size * 0.35 - 20}
+            height={size * 0.385 - 20}
           />
           <ExampleView
             width={size * 1.72}
-            height={size * 0.35 - 20}
+            height={size * 0.385 - 20}
+            margin={margin}
+            methods={methods}
+            labelColors={labelColors}
+            pointNum={pointNum}
           />
         </div>
         <MainView
