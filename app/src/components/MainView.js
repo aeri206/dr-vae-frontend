@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
+import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
 
 
@@ -16,14 +17,12 @@ const MainView = (props) => {
   const mainViewRef = useRef(null);
   const latentViewRef = useRef(null);
   const simEmbSvgRef = useRef(null);
+  const captureViewRef = useRef(null);
 
   // CONSTANTs for components
   let simEmbBarChart;
+  let captureViewManage;
 
-
-  useEffect(() => {
-
-  }, []);
 
   // NOTE for constructing / managing similar embedding bar chart
   useEffect(() => {
@@ -39,9 +38,14 @@ const MainView = (props) => {
       methods
     );
     simEmbBarChart.initialize(initialValues);
-    // simEmbBarChart.update(updateValues, 1000);
+    simEmbBarChart.update(updateValues, 1000);
 
   }, []);
+
+  // NOTE for capture view
+  useEffect(() => {
+    captureViewManage = new CaptureViewManage(captureViewRef, size * 0.33);
+  });
 
 
 
@@ -51,7 +55,7 @@ const MainView = (props) => {
 
   function updateLatentValue(e) {
     const latentNum = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
- 
+    
   }
 
 
@@ -117,11 +121,37 @@ const MainView = (props) => {
         style={{
           marginTop: margin,
           width: size * 0.38,
-          height: size
+          height: size,
         }}
       >
+        <div 
+          style={{height: size - 21, width: size * 0.38}}
+          ref={captureViewRef}
+        >
+          {
+            [0, 0, 0].map((d, i) => {
+              return (
+                <div style={{display:'flex', marginBottom: 4}}>
+                  <canvas 
+                    key={i}
+                    width={size * 1.4}
+                    height={size * 1.4}
+                    style={
+                      scatterplotStyle(size * 0.3)
+                    }
+                  ></canvas>
+                  <button style={{
+                    marginLeft: 5,
+                    height: 22
 
+                  }}>X</button>
+                 </div>
+              )
+            })
+          }
         </div>
+        <button style={{width: size * 0.38, height: 23}}>Click to Capture!!</button>
+      </div>
      </div>
   )
 
