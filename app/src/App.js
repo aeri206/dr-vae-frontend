@@ -13,8 +13,14 @@ function App() {
   const margin = 10;
   const methods = ["umap", "tsne", "isomap", "densmap", "lle"];
   const labelColors = d3.scaleOrdinal(d3.schemeCategory10);
-  const embCategoryColors = d3.scaleOrdinal(d3.schemeDark2)
+  const embCategoryColors = d3.scaleOrdinal(d3.schemeDark2);
   const pointNum = 400;
+  // 왠지 모르겠는데 이렇게해야 에러안남
+  embCategoryColors(0);
+  embCategoryColors(1);
+  embCategoryColors(2);
+  embCategoryColors(3);
+  //일케일케
 
   return (
     <div className="App">

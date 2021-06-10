@@ -59,6 +59,8 @@ const ExampleView = (props) => {
 		const id = e.target.id.slice(6);
 		e.target.style.border = "3px solid black";
 
+		console.log(method2Idx[id])
+
 		d3.select("#barchart")
 		  .select("#" + id + "rect")
 			.attr("fill", d3.rgb(embCategoryColors(method2Idx[id])).darker(2))
@@ -69,6 +71,7 @@ const ExampleView = (props) => {
 	function mouseoutExampleView(e) {
 		const id = e.target.id.slice(6);
 		e.target.style.border = "1px solid black";
+
 
 		d3.select("#barchart")
 		  .select("#" + id + "rect")

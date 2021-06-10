@@ -39,7 +39,7 @@ const MainView = (props) => {
       methods
     );
     simEmbBarChart.initialize(initialValues);
-    simEmbBarChart.update(updateValues, 1000);
+    // simEmbBarChart.update(updateValues, 1000);
 
   }, []);
 
