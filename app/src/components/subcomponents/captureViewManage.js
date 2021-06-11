@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import  {deepcopyArr } from "../../helpers/utils"
 
 export class CaptureViewManage {
 	constructor(dom) {
@@ -16,8 +17,8 @@ export class CaptureViewManage {
 				break;
 			}
 		}
-		this.latentValuesList[index] = latentValues;
-		this.embeddingList[index] = embedding;
+		this.latentValuesList[index] = deepcopyArr(latentValues);
+		this.embeddingList[index] = deepcopyArr(embedding);
 		this.currentVisible[index] = true;
 		document.getElementById("capture" + index).style.visibility = "visible";
 	}
