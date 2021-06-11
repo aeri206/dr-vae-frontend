@@ -78,7 +78,7 @@ const MainView = (props) => {
 
   // NOTE for capture view
   useEffect(() => {
-    captureViewManage = new CaptureViewManage(captureViewRef, size * 0.33);
+    captureViewManage = new CaptureViewManage(captureViewRef, pointNum, colorData);
   });
 
   function captureCurrentEmbedding(e) {
@@ -87,7 +87,9 @@ const MainView = (props) => {
       alert("Cannot add more captures!! Erase to add new capture.");
       return;
     }
-    else { captureViewManage.addCapture([], []); }
+    else { 
+      captureViewManage.addCapture(latentValues, emb); 
+    }
   }
 
   function removeCurrentCapture(e) {
@@ -97,8 +99,11 @@ const MainView = (props) => {
 
   function restoreCurrentCapture(e) {
     const index = e.target.id.slice(13);
-    const [latentValue, embedding] = captureViewManage.returnInfo(index);
-    // restoring하는거 짜야함
+    const [currlatentValues, embedding] = captureViewManage.returnInfo(index);
+    mainViewSplot.update({ position: embedding }, 1000, 0);
+    currlatentValues.forEach((val, i) => {
+      document.getElementById("latent" + i).value = val * 10;
+    })
   }
 
   function mouseoverCapture(e) { e.target.style.border = "2px solid black"; }
@@ -205,6 +210,7 @@ const MainView = (props) => {
                   style={{display:'flex', marginBottom: 4, visibility: "hidden"}}
                 >
                   <canvas 
+                    id={"capturecanvas" + i}
                     width={size * 1.4}
                     height={size * 1.4}
                     style={scatterplotStyle(size * 0.3)}
