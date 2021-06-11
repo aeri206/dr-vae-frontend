@@ -6,7 +6,7 @@ import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
 import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
-import { getLatentEmb, reconstruction } from '../helpers/server';
+import { getLatentEmb, reconstruction, getKnn } from '../helpers/server';
 
 
 
@@ -62,7 +62,7 @@ const MainView = (props) => {
     mainViewSplot = new Scatterplot(data, mainViewRef.current);
 
     const latentEmbData = await getLatentEmb(url);
-    console.log(latentEmbData)
+    const latentKnnData = await getKnn(url, latentValues);
 
     latentEmb = latentEmbData.emb;
     latentLabel = latentEmbData.label;
@@ -72,29 +72,20 @@ const MainView = (props) => {
       return [color.r, color.g, color.b];
     });
 
-
-    console.log(latentEmb, emb)
+    [[0, 0, 0]].concat(latentColorData)
+    
     const latentData = {
-      position: latentEmb,
-      opacity: new Array(latentEmb.length).fill(1),
-      color: latentColorData,
-      border: new Array(latentEmb.length).fill(0),
-      borderColor: latentColorData,
-      radius: new Array(latentEmb.length).fill(radius * 0.5),
+      position: [latentKnnData.coor].concat(latentEmb),
+      opacity: new Array(latentEmb.length + 1).fill(1),
+      color: [[255, 255, 255]].concat(latentColorData),
+      border:[20].concat(new Array(latentEmb.length).fill(0)),
+      borderColor: [[0, 0, 0]].concat(latentColorData),
+      radius: [radius * 2].concat(new Array(latentEmb.length).fill(radius * 0.5)),
     }
 
+    // console.log(latentData)
+
     latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
-
-
-  }, [props]);
-  
-
-
-  // NOTE for constructing / managing similar embedding bar chart
-  useEffect(() => {
-    // data for testing
-    const initialValues  = [15, 20, 4, 13, 30];
-    const updateValues   = [20, 25, 2, 3, 20];
 
     simEmbBarChart = new barChart(
       simEmbSvgRef, 
@@ -103,10 +94,14 @@ const MainView = (props) => {
       margin,
       methods
     );
-    simEmbBarChart.initialize(initialValues);
-    simEmbBarChart.update(updateValues, 1000);
 
-  }, []);
+    const labelNums = latentKnnData.labels.reduce((acc, curr) => {
+      acc[curr] += 1;
+      return acc;
+    }, [0, 0, 0, 0, 0])
+    simEmbBarChart.initialize(labelNums);
+
+  }, [props]);
 
   // NOTE for capture view
   useEffect(() => {
@@ -158,6 +153,25 @@ const MainView = (props) => {
         position: emb
       }
       mainViewSplot.update(data, 50, 0);
+    })();
+
+    (async () => {
+      const data = await getKnn(url, latentValues);
+      const coor = data.coor;
+      const labels = data.labels;
+      const labelNums = labels.reduce((acc, curr) => {
+        acc[curr] += 1;
+        return acc;
+      }, [0, 0, 0, 0, 0])
+      console.log(labelNums);
+
+      simEmbBarChart.update(labelNums, 10);
+      const latentData = {
+        position: [coor].concat(latentEmb)
+      }
+
+      latentViewSplot.update(latentData, 10, 0)
+
     })();
 
 

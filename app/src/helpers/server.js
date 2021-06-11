@@ -31,3 +31,13 @@ export async function getLatentEmb(url) {
 	})
 	return data;
 }
+
+export async function getKnn(url, latentValues) {
+	let knn;
+	await axios.get(url + "getknn", {
+		params: { latentValues: { data: latentValues } }
+	}).then(response => {
+		knn = response.data;
+	})
+	return knn;
+}
