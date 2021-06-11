@@ -47,6 +47,22 @@ const MainView = (props) => {
     captureViewManage = new CaptureViewManage(captureViewRef, size * 0.33);
   });
 
+  function captureCurrentEmbedding(e) {
+    const currCaptureNum = captureViewManage.currentCaptureNum();
+    if (currCaptureNum === 3) {
+      alert("Cannot add more captures!! Erase to add new capture.");
+      return;
+    }
+    else {
+      // 여기 latent value랑 넣어줘서 restore하게 하면 될듯
+      captureViewManage.addCapture([], []);          
+    }
+  }
+
+  function removeCurrentCapture(e) {
+    const index = e.target.id.slice(13);
+  }
+
 
 
   // NOTE about latent variables
@@ -131,26 +147,32 @@ const MainView = (props) => {
           {
             [0, 0, 0].map((d, i) => {
               return (
-                <div style={{display:'flex', marginBottom: 4}}>
+                <div 
+                  key={i} 
+                  id={"capture" + i}
+                  style={{display:'flex', marginBottom: 4, visibility: "hidden"}}
+                >
                   <canvas 
-                    key={i}
                     width={size * 1.4}
                     height={size * 1.4}
                     style={
                       scatterplotStyle(size * 0.3)
                     }
                   ></canvas>
-                  <button style={{
-                    marginLeft: 5,
-                    height: 22
-
-                  }}>X</button>
+                  <button 
+                    id={"capturebutton" + i}
+                    style={{
+                      marginLeft: 5,
+                      height: 22
+                    }}
+                    onClick={removeCurrentCapture}
+                  >X</button>
                  </div>
               )
             })
           }
         </div>
-        <button style={{width: size * 0.38, height: 23}}>Click to Capture!!</button>
+        <button style={{width: size * 0.38, height: 23}} onClick={captureCurrentEmbedding}>Click to Capture!!</button>
       </div>
      </div>
   )

@@ -11,10 +11,8 @@ const ExampleView = (props) => {
 	const radius = 8;
 
 	const method2Idx = {}
-	console.log(methods)
 	methods.forEach((d, i) => { method2Idx[d] = i; });
 
-	console.log(method2Idx)
 	
 	const exampleSize = props.height - props.margin * 2;
 	const labelColors = props.labelColors;
@@ -59,7 +57,6 @@ const ExampleView = (props) => {
 		const id = e.target.id.slice(6);
 		e.target.style.border = "3px solid black";
 
-		console.log(method2Idx[id])
 
 		d3.select("#barchart")
 		  .select("#" + id + "rect")
