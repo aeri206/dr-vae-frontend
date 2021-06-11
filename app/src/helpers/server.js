@@ -23,3 +23,11 @@ function embScale(embedding) {
 		return [xScale(d[0]), yScale(d[1])];
 	});
 }
+
+export async function getLatentEmb(url) {
+	let data;
+	await axios.get(url + "getlatentemb").then(response => {
+		data = response.data;
+	})
+	return data;
+}

@@ -6,7 +6,7 @@ import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
 import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
-import { reconstruction } from '../helpers/reconstruction';
+import { getLatentEmb, reconstruction } from '../helpers/server';
 
 
 
@@ -20,6 +20,7 @@ const MainView = (props) => {
   const pointNum = props.pointNum;
   const labelData = props.labelData;
   const labelColors = props.labelColors;
+  const embCategoryColors = props.embCategoryColors;
   const url = props.url;
 
   const mainViewRef = useRef(null);
@@ -27,7 +28,7 @@ const MainView = (props) => {
   const simEmbSvgRef = useRef(null);
   const captureViewRef = useRef(null);
   
-  let mainViewSplot;
+  let mainViewSplot, latentViewSplot;
 
   // CONSTANT datas (latent values / current embedding)
   let emb;
@@ -38,12 +39,17 @@ const MainView = (props) => {
 		return [color.r, color.g, color.b];
 	});
 
+  let latentColorData;
+
   // CONSTANTs for components
   let simEmbBarChart;
   let captureViewManage;
 
+  let latentEmb, latentLabel;
+
   // NOTE Initial Embedding construction
   useEffect(async () => {
+    // main view construction 
     emb = await reconstruction(url, latentValues);
     const data = {
       position: emb,
@@ -54,6 +60,32 @@ const MainView = (props) => {
       radius: new Array(pointNum).fill(radius),
     }
     mainViewSplot = new Scatterplot(data, mainViewRef.current);
+
+    const latentEmbData = await getLatentEmb(url);
+    console.log(latentEmbData)
+
+    latentEmb = latentEmbData.emb;
+    latentLabel = latentEmbData.label;
+
+    latentColorData = latentLabel.map(idx => {
+      const color = d3.rgb(embCategoryColors(idx));
+      return [color.r, color.g, color.b];
+    });
+
+
+    console.log(latentEmb, emb)
+    const latentData = {
+      position: latentEmb,
+      opacity: new Array(latentEmb.length).fill(1),
+      color: latentColorData,
+      border: new Array(latentEmb.length).fill(0),
+      borderColor: latentColorData,
+      radius: new Array(latentEmb.length).fill(radius * 0.5),
+    }
+
+    latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
+
+
   }, [props]);
   
 
