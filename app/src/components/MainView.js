@@ -45,7 +45,6 @@ const MainView = (props) => {
   // NOTE Initial Embedding construction
   useEffect(async () => {
     emb = await reconstruction(url, latentValues);
-    // console.log(emb)
     const data = {
       position: emb,
       opacity: new Array(pointNum).fill(1),
@@ -114,16 +113,14 @@ const MainView = (props) => {
 
   function updateLatentValue(e) {
     const latentIdx = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
-    // console.log(e.target.value)
     latentValues[latentIdx] = e.target.value / 10;
-    // console.log(latentValues);
 
     (async () => {
       emb = await reconstruction(url, latentValues);
       const data = {
         position: emb
       }
-      mainViewSplot.update(data, 30, 0);
+      mainViewSplot.update(data, 50, 0);
     })();
 
 
