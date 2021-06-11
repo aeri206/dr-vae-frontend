@@ -19,6 +19,9 @@ const MainView = (props) => {
   const simEmbSvgRef = useRef(null);
   const captureViewRef = useRef(null);
 
+  // CONSTANT datas (latent values / current embedding)
+  let emb, latentValues;
+
   // CONSTANTs for components
   let simEmbBarChart;
   let captureViewManage;
@@ -62,7 +65,9 @@ const MainView = (props) => {
   }
 
   function restoreCurrentCapture(e) {
-
+    const index = e.target.id.slice(13);
+    const [latentValue, embedding] = captureViewManage.returnInfo(index);
+    // restoring하는거 짜야함
   }
 
   function mouseoverCapture(e) {
