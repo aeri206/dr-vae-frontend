@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import  {deepcopyArr } from "../../helpers/utils"
+import  { deepcopyArr } from "../../helpers/utils"
 
 export class CaptureViewManage {
 	constructor(dom) {

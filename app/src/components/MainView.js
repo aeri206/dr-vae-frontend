@@ -1,9 +1,13 @@
 import React, { useEffect, useRef } from 'react';
+import * as d3 from "d3";
 
+import { Scatterplot } from "./subcomponents/scatterplot";
 import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
 import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
+import { reconstruction } from '../helpers/reconstruction';
+
 
 
 const MainView = (props) => {
@@ -13,18 +17,46 @@ const MainView = (props) => {
   const size   = props.size;
   const margin = props.margin;
   const methods = props.methods;
+  const pointNum = props.pointNum;
+  const labelData = props.labelData;
+  const labelColors = props.labelColors;
+  const url = props.url;
 
   const mainViewRef = useRef(null);
   const latentViewRef = useRef(null);
   const simEmbSvgRef = useRef(null);
   const captureViewRef = useRef(null);
+  
+  let mainViewSplot;
 
   // CONSTANT datas (latent values / current embedding)
-  let emb, latentValues;
+  let emb;
+  let latentValues = [0, 0, 0, 0, 0];
+
+  const colorData = labelData.map(idx => {
+		const color = d3.rgb(labelColors(idx));
+		return [color.r, color.g, color.b];
+	});
 
   // CONSTANTs for components
   let simEmbBarChart;
   let captureViewManage;
+
+  // NOTE Initial Embedding construction
+  useEffect(async () => {
+    emb = await reconstruction(url, latentValues);
+    // console.log(emb)
+    const data = {
+      position: emb,
+      opacity: new Array(pointNum).fill(1),
+      color: colorData,
+      border: new Array(pointNum).fill(0),
+      borderColor: colorData,
+      radius: new Array(pointNum).fill(radius),
+    }
+    mainViewSplot = new Scatterplot(data, mainViewRef.current);
+  }, [props]);
+  
 
 
   // NOTE for constructing / managing similar embedding bar chart
@@ -70,14 +102,9 @@ const MainView = (props) => {
     // restoring하는거 짜야함
   }
 
-  function mouseoverCapture(e) {
-    e.target.style.border = "2px solid black";
-  }
+  function mouseoverCapture(e) { e.target.style.border = "2px solid black"; }
 
-  function mouseoutCapture(e) {
-    e.target.style.border = "1px solid black";
-
-  }
+  function mouseoutCapture(e) { e.target.style.border = "1px solid black";}
 
 
 
@@ -86,8 +113,20 @@ const MainView = (props) => {
   const latentValArray = new Array(latentValNum).fill(0);
 
   function updateLatentValue(e) {
-    const latentNum = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
-    
+    const latentIdx = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
+    // console.log(e.target.value)
+    latentValues[latentIdx] = e.target.value / 10;
+    // console.log(latentValues);
+
+    (async () => {
+      emb = await reconstruction(url, latentValues);
+      const data = {
+        position: emb
+      }
+      mainViewSplot.update(data, 30, 0);
+    })();
+
+
   }
 
 
@@ -110,9 +149,9 @@ const MainView = (props) => {
               <input 
                 id={"latent" + i}
                 type="range"
-                min={1} 
-                max={100}
-                defaultValue={50} 
+                min={-15} 
+                max={15}
+                defaultValue={0} 
                 className="slider"
                 onChange={updateLatentValue}
               />

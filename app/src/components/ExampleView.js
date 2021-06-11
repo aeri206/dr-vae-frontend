@@ -20,7 +20,7 @@ const ExampleView = (props) => {
 
 	const scatterplots = [];
 
-	const labelData = require("../json/label.json");
+	const labelData = props.labelData;
 	const exampleData = methods.map(d => { 
 		const data = require("../json/" + d + ".json"); 
 		const xMax = d3.max(data.map(d => d[0]));

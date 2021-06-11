@@ -9,12 +9,17 @@ import * as d3 from "d3";
 function App() {
 
   const size   = 400;
-  const radius = 3;
+  const radius = 30;
   const margin = 10;
   const methods = ["umap", "tsne", "isomap", "densmap", "lle"];
   const labelColors = d3.scaleOrdinal(d3.schemeCategory10);
   const embCategoryColors = d3.scaleOrdinal(d3.schemeDark2);
   const pointNum = 400;
+  const url = "http://127.0.0.1:5000/";
+  const labelData = require("./json/label.json")
+
+  const range = [-1.5, 1.5];
+
   // 왠지 모르겠는데 이렇게해야 에러안남
   embCategoryColors(0);
   embCategoryColors(1);
@@ -46,6 +51,7 @@ function App() {
             labelColors={labelColors}
             embCategoryColors={embCategoryColors}
             pointNum={pointNum}
+            labelData={labelData}
           />
         </div>
         <MainView
@@ -54,6 +60,10 @@ function App() {
           margin={margin}
           methods={methods}
           embCategoryColors={embCategoryColors}
+          labelColors={labelColors}
+          pointNum={pointNum}
+          labelData={labelData}
+          url={url}
         />
       </div>
     </div>
