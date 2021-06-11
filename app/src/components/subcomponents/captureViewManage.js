@@ -22,8 +22,9 @@ export class CaptureViewManage {
 		document.getElementById("capture" + index).style.visibility = "visible";
 	}
 
-	removeCapture() {
-
+	removeCapture(index) {
+		this.currentVisible[index] = false;
+		document.getElementById("capture" + index).style.visibility = "hidden";
 	}
 
 	currentCaptureNum() {

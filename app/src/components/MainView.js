@@ -61,6 +61,7 @@ const MainView = (props) => {
 
   function removeCurrentCapture(e) {
     const index = e.target.id.slice(13);
+    captureViewManage.removeCapture(index)
   }
 
 
