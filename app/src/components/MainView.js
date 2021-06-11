@@ -53,15 +53,25 @@ const MainView = (props) => {
       alert("Cannot add more captures!! Erase to add new capture.");
       return;
     }
-    else {
-      // 여기 latent value랑 넣어줘서 restore하게 하면 될듯
-      captureViewManage.addCapture([], []);          
-    }
+    else { captureViewManage.addCapture([], []); }
   }
 
   function removeCurrentCapture(e) {
     const index = e.target.id.slice(13);
     captureViewManage.removeCapture(index)
+  }
+
+  function restoreCurrentCapture(e) {
+
+  }
+
+  function mouseoverCapture(e) {
+    e.target.style.border = "2px solid black";
+  }
+
+  function mouseoutCapture(e) {
+    e.target.style.border = "1px solid black";
+
   }
 
 
@@ -156,9 +166,10 @@ const MainView = (props) => {
                   <canvas 
                     width={size * 1.4}
                     height={size * 1.4}
-                    style={
-                      scatterplotStyle(size * 0.3)
-                    }
+                    style={scatterplotStyle(size * 0.3)}
+                    onClick={restoreCurrentCapture}
+                    onMouseOver={mouseoverCapture}
+                    onMouseOut={mouseoutCapture}
                   ></canvas>
                   <button 
                     id={"capturebutton" + i}

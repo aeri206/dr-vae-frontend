@@ -32,4 +32,11 @@ export class CaptureViewManage {
 		this.currentVisible.forEach((d) => { if(d) num ++; });
 		return num;
 	}
+
+	returnInfo(index) {
+		return [
+			this.latentValuesList[index],
+			this.embeddingList[index]
+		];
+	}
 }
