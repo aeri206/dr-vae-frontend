@@ -33,6 +33,8 @@ const MainView = (props) => {
   // CONSTANT datas (latent values / current embedding)
   let emb;
   let latentValues = [0, 0, 0, 0, 0];
+  
+  let latentcoor;
 
   const colorData = labelData.map(idx => {
 		const color = d3.rgb(labelColors(idx));
@@ -73,6 +75,8 @@ const MainView = (props) => {
     });
 
     [[0, 0, 0]].concat(latentColorData)
+
+    latentcoor = latentKnnData.coor;
     
     const latentData = {
       position: [latentKnnData.coor].concat(latentEmb),
@@ -135,7 +139,7 @@ const MainView = (props) => {
       const latentKnnData = await getKnn(url, currlatentValues);
       // console.log(latentKnnData)
 
-      const coor = latentKnnData.coor;
+      latentcoor = latentKnnData.coor;
       const labels = latentKnnData.labels;
 
       const labelNums = labels.reduce((acc, curr) => {
@@ -145,7 +149,7 @@ const MainView = (props) => {
       simEmbBarChart.update(labelNums, 1000);
 
       const latentData = {
-        position: [coor].concat(latentEmb)
+        position: [latentcoor].concat(latentEmb)
       }
 
       latentViewSplot.update(latentData, 1000, 0);
@@ -177,7 +181,7 @@ const MainView = (props) => {
 
     (async () => {
       const data = await getKnn(url, latentValues);
-      const coor = data.coor;
+      latentcoor = data.coor;
       const labels = data.labels;
       const labelNums = labels.reduce((acc, curr) => {
         acc[curr] += 1;
@@ -187,7 +191,7 @@ const MainView = (props) => {
 
       simEmbBarChart.update(labelNums, 10);
       const latentData = {
-        position: [coor].concat(latentEmb)
+        position: [latentcoor].concat(latentEmb)
       }
 
       latentViewSplot.update(latentData, 10, 0)
