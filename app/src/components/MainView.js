@@ -130,7 +130,27 @@ const MainView = (props) => {
     mainViewSplot.update({ position: embedding }, 1000, 0);
     currlatentValues.forEach((val, i) => {
       document.getElementById("latent" + i).value = val * 10;
-    })
+    });
+    (async () => {
+      const latentKnnData = await getKnn(url, currlatentValues);
+      // console.log(latentKnnData)
+
+      const coor = latentKnnData.coor;
+      const labels = latentKnnData.labels;
+
+      const labelNums = labels.reduce((acc, curr) => {
+        acc[curr] += 1;
+        return acc;
+      }, [0, 0, 0, 0, 0])
+      simEmbBarChart.update(labelNums, 1000);
+
+      const latentData = {
+        position: [coor].concat(latentEmb)
+      }
+
+      latentViewSplot.update(latentData, 1000, 0);
+
+    })();
   }
 
   function mouseoverCapture(e) { e.target.style.border = "2px solid black"; }
@@ -163,7 +183,7 @@ const MainView = (props) => {
         acc[curr] += 1;
         return acc;
       }, [0, 0, 0, 0, 0])
-      console.log(labelNums);
+      // console.log(labelNums);
 
       simEmbBarChart.update(labelNums, 10);
       const latentData = {
