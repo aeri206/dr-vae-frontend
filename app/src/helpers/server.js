@@ -41,3 +41,16 @@ export async function getKnn(url, latentValues) {
 	})
 	return knn;
 }
+
+export async function latentCoorToOthers(url, coor) {
+	let data;
+	
+	await axios.get(url + "latentcoortoothers", {
+		params: { coor: { data: coor }}
+	}).then(response => {
+		data = response.data;
+		data.emb = embScale(data.emb);
+	});
+
+	return data;
+}

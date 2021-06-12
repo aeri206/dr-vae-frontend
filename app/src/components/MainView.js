@@ -6,7 +6,8 @@ import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
 import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
-import { getLatentEmb, reconstruction, getKnn } from '../helpers/server';
+import { getLatentEmb, reconstruction, getKnn, latentCoorToOthers } from '../helpers/server';
+import { deepcopyArr } from '../helpers/utils';
 
 
 
@@ -197,9 +198,83 @@ const MainView = (props) => {
       latentViewSplot.update(latentData, 10, 0)
 
     })();
-
-
   }
+
+
+  // NOTE adjusting current location in latent embeddings
+
+  let draggingLatentPos = false;
+  let dragStartPosition = [0, 0];
+  let dragCurrentPosition = [0, 0];
+  let draggingInterval;
+
+  useEffect(() => {
+    latentViewRef.current.addEventListener('mousedown',(e) => {
+      const paneSize = size * 0.5;
+      const xCoor = 2 * (e.offsetX / paneSize) - 1;
+      const yCoor = 2 * ((paneSize - e.offsetY) / paneSize) - 1;
+      const dist2LatentCoor = Math.sqrt((xCoor - latentcoor[0]) * (xCoor - latentcoor[0]) 
+                                      + (yCoor - latentcoor[1]) * (yCoor - latentcoor[1]));  
+      const distThreshold = radius * 8 / (size * 10);           
+      if (distThreshold > dist2LatentCoor) {
+        draggingLatentPos = true;
+        // console.log()
+        dragStartPosition = [xCoor, yCoor];
+        dragCurrentPosition = [xCoor, yCoor];
+        console.log("Start dragging");
+        draggingInterval = setInterval(() => {
+          const latentData = {
+            position: [dragCurrentPosition].concat(latentEmb)
+          };
+          latentViewSplot.update(latentData, 50, 0);
+          (async () => {
+            let data = await latentCoorToOthers(url, dragCurrentPosition);
+
+            // update bar chart
+            const labelNums = data.labels.reduce((acc, curr) => {
+              acc[curr] += 1;
+              return acc;
+            }, [0, 0, 0, 0, 0]);
+            simEmbBarChart.update(labelNums, 50);
+
+            // update embedding
+            emb = data.emb;
+            const embData = {
+              position: emb
+            }
+            mainViewSplot.update(embData, 50, 0);
+
+            // update latent value
+            latentValues = data.latent_values;
+            latentValues.forEach((val, i) => {
+              document.getElementById("latent" + i).value = val * 10;
+            });
+            
+
+          })();
+        }, 100)
+      }
+    });
+
+    latentViewRef.current.addEventListener('mousemove', (e) => {
+      const paneSize = size * 0.5;
+      const xCoor = 2 * (e.offsetX / paneSize) - 1;
+      const yCoor = 2 * ((paneSize - e.offsetY) / paneSize) - 1;
+      dragCurrentPosition = [xCoor, yCoor];
+    });
+
+
+
+    latentViewRef.current.addEventListener('mouseup', (e) => {
+      clearInterval(draggingInterval);
+      if (draggingLatentPos) {
+        draggingLatentPos = false;
+        latentcoor = [dragCurrentPosition[0], dragCurrentPosition[1]];
+        console.log("End dragging");
+      }
+    })
+
+  }, [])
 
 
   return (
