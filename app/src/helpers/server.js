@@ -9,6 +9,7 @@ export async function reconstruction(url, latentValues) {
 	}).then(response => {
 		embedding = response.data;
 	})
+	// console.log(embScale(embedding)); // embedding should be 2D array (N)[Array(2), Array(2)..]
 	return embScale(embedding)
 }
 
@@ -51,6 +52,25 @@ export async function latentCoorToOthers(url, coor) {
 		data = response.data;
 		data.emb = embScale(data.emb);
 	});
-
 	return data;
 }
+
+export async function reload(url, dataset, pointNum) {
+	let latent_dims;
+	await axios.get(url + "reload", {
+		params: { dataset, pointNum }
+	}).then(res => {
+		latent_dims = res.data
+	});
+	return latent_dims;
+}
+
+export async function getDim(url, dataset, pointNum) {
+	let latent_dims;
+	await axios.get(url + "getdims", {
+		params: { dataset, pointNum }
+	}).then(res => {
+		latent_dims = res.data
+	})
+	return latent_dims;
+	}

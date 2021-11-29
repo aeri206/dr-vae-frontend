@@ -170,6 +170,7 @@
  
  
 		 let startTime = null;
+
  
 		 const updateSplot = this.updateCommand(newPositions, newOpacity, newColor, newRadius, newBorder, newBorderColor);
  

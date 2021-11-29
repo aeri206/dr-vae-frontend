@@ -38,6 +38,7 @@ const ExampleView = (props) => {
 	});
 
 	useEffect(() => {
+		// console.log('useEffect')
 		methods.forEach((method, i) => {
 			const data = {
 				position: exampleData[i],

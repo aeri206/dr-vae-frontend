@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+// import * as d3 from "d3";
 import  { deepcopyArr } from "../../helpers/utils";
 import  { Scatterplot } from "./scatterplot";
 
@@ -9,7 +9,7 @@ export class CaptureViewManage {
 		this.embeddingList = [[], [], []];    // coordinates
 		this.currentVisible = [false, false, false];
 		
-		const radius = 16;
+		const radius = 10;
 
 		this.scatterplotList = [];
 		for (let i = 0; i < 3; i++) {
@@ -21,10 +21,11 @@ export class CaptureViewManage {
 				borderColor: colorData,
 				radius: new Array(pointNum).fill(radius),
 			}
+			document.getElementById("capture" + i.toString()).style.visibility = "hidden";
 			this.scatterplotList[i] = new Scatterplot(data, document.getElementById("capturecanvas" + i))
 		}
 	}
-
+	
 	addCapture(latentValues, embedding) {
 		let index;
 		for(let i = 0; i < this.currentVisible.length; i++) {
@@ -44,6 +45,14 @@ export class CaptureViewManage {
 	removeCapture(index) {
 		this.currentVisible[index] = false;
 		document.getElementById("capture" + index).style.visibility = "hidden";
+		for (let i = index + 1 ; i < this.currentVisible.length ; i++){
+			if (this.currentVisible[i]){
+				this.addCapture(this.latentValuesList[i], this.embeddingList[i]);
+				this.currentVisible[i] = false;
+				document.getElementById("capture" + i).style.visibility = "hidden";
+			}
+			else break;
+		}
 	}
 
 	currentCaptureNum() {

@@ -5,6 +5,7 @@ import { axisLeft } from "d3";
 export class barChart {
 	constructor (ref, width, height, margin, methods){
 		this.dom = ref.current;
+		this.dom.innerHTML = '';
 		this.width = width;
 		this.height = height;
 		this.margin = margin;

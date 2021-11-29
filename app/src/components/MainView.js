@@ -6,29 +6,49 @@ import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
 import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
-import { getLatentEmb, reconstruction, getKnn, latentCoorToOthers } from '../helpers/server';
-import { deepcopyArr } from '../helpers/utils';
+import { getLatentEmb, reconstruction, getKnn, latentCoorToOthers, reload } from '../helpers/server';
+import { useParams } from "react-router-dom";
+// import { deepcopyArr } from '../helpers/utils';
+import ScrollBar from './subcomponents/ScrollBar';
 
 
 
 const MainView = (props) => {
+  let params = useParams();
+  
+  // console.log('mainview', params)
+  const pointNum = parseInt(params.pointNum);
+  const dataset = params.dataset;
+  let labelData = require(`../json/${dataset}-${pointNum.toString()}-label.json`);
+      if (typeof labelData === 'object' && labelData !== null){
+        labelData = Object.values(labelData)
+      }
+  
+  let labelColors = d3.scaleOrdinal(d3.schemeCategory10);
+  let embCategoryColors = d3.scaleOrdinal(d3.schemeDark2);
+
+  embCategoryColors(0);
+  embCategoryColors(1);
+  embCategoryColors(2);
+  embCategoryColors(3);
+
 
   // CONSTANTs for managing layout / design
   const radius = props.radius;
   const size   = props.size;
+  const paneSize = size * 0.5;
   const margin = props.margin;
   const methods = props.methods;
-  const pointNum = props.pointNum;
-  const labelData = props.labelData;
-  const labelColors = props.labelColors;
-  const embCategoryColors = props.embCategoryColors;
+  
   const url = props.url;
-
+  
+  const scrollRef = useRef(null);
   const mainViewRef = useRef(null);
   const latentViewRef = useRef(null);
   const simEmbSvgRef = useRef(null);
   const captureViewRef = useRef(null);
   
+
   let mainViewSplot, latentViewSplot;
 
   // CONSTANT datas (latent values / current embedding)
@@ -45,69 +65,76 @@ const MainView = (props) => {
   let latentColorData;
 
   // CONSTANTs for components
-  let simEmbBarChart;
+  let simEmbBarChart;  
   let captureViewManage;
 
   let latentEmb, latentLabel;
-
+  
   // NOTE Initial Embedding construction
-  useEffect(async () => {
-    // main view construction 
-    emb = await reconstruction(url, latentValues);
-    const data = {
-      position: emb,
-      opacity: new Array(pointNum).fill(1),
-      color: colorData,
-      border: new Array(pointNum).fill(0),
-      borderColor: colorData,
-      radius: new Array(pointNum).fill(radius),
-    }
-    mainViewSplot = new Scatterplot(data, mainViewRef.current);
+  useEffect(() => {
 
-    const latentEmbData = await getLatentEmb(url);
-    const latentKnnData = await getKnn(url, latentValues);
-
-    latentEmb = latentEmbData.emb;
-    latentLabel = latentEmbData.label;
-
-    latentColorData = latentLabel.map(idx => {
-      const color = d3.rgb(embCategoryColors(idx));
-      return [color.r, color.g, color.b];
-    });
-
-    [[0, 0, 0]].concat(latentColorData)
-
-    latentcoor = latentKnnData.coor;
-    
-    const latentData = {
-      position: [latentKnnData.coor].concat(latentEmb),
-      opacity: new Array(latentEmb.length + 1).fill(1),
-      color: [[255, 255, 255]].concat(latentColorData),
-      border:[20].concat(new Array(latentEmb.length).fill(0)),
-      borderColor: [[0, 0, 0]].concat(latentColorData),
-      radius: [radius * 2].concat(new Array(latentEmb.length).fill(radius * 0.5)),
-    }
-
-    // console.log(latentData)
-
-    latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
-
-    simEmbBarChart = new barChart(
-      simEmbSvgRef, 
-      size * 0.4, 
-      size * 0.405, 
-      margin,
-      methods
-    );
-
-    const labelNums = latentKnnData.labels.reduce((acc, curr) => {
-      acc[curr] += 1;
-      return acc;
-    }, [0, 0, 0, 0, 0])
-    simEmbBarChart.initialize(labelNums);
-
-  }, [props]);
-
+    (async() => {
+      await reload(url, dataset, pointNum).then(async dims => {
+        await reconstruction(url, latentValues).then(async res => {
+          emb = res;
+  
+          const data = {
+            position: emb,
+            opacity: new Array(emb.length).fill(1),
+            color: colorData,
+            border: new Array(emb.length).fill(0),
+            borderColor: colorData,
+            radius: new Array(emb.length).fill(radius),
+          }
+          mainViewSplot = new Scatterplot(data, mainViewRef.current);
+          
+          const latentEmbData = await getLatentEmb(url);
+          const latentKnnData = await getKnn(url, latentValues);
+      
+          latentEmb = latentEmbData.emb;
+          latentLabel = latentEmbData.label;
+      
+          latentColorData = latentLabel.map(idx => {
+            const color = d3.rgb(embCategoryColors(idx));
+            return [color.r, color.g, color.b];
+          });
+      
+          [[0, 0, 0]].concat(latentColorData)
+      
+          latentcoor = latentKnnData.coor;
+          
+          const latentData = {
+            position: [latentKnnData.coor].concat(latentEmb),
+            opacity: new Array(latentEmb.length + 1).fill(1),
+            color: [[255, 255, 255]].concat(latentColorData),
+            border:[50].concat(new Array(latentEmb.length).fill(0)),
+            borderColor: [[0, 0, 0]].concat(latentColorData),
+            radius: [radius * 8].concat(new Array(latentEmb.length).fill(radius * 0.5)),
+          }
+      
+      
+          latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
+          
+          simEmbBarChart = new barChart(
+            simEmbSvgRef, 
+            size * 0.4, 
+            size * 0.405, 
+            margin,
+            methods
+          );
+      
+          const labelNums = latentKnnData.labels.reduce((acc, curr) => {
+            acc[curr] += 1;
+            return acc;
+          }, [0, 0, 0, 0, 0])
+          simEmbBarChart.initialize(labelNums);
+  
+        })
+      })
+  
+    })();
+  }, [params]);
+  
   // NOTE for capture view
   useEffect(() => {
     captureViewManage = new CaptureViewManage(captureViewRef, pointNum, colorData);
@@ -126,7 +153,7 @@ const MainView = (props) => {
 
   function removeCurrentCapture(e) {
     const index = e.target.id.slice(13);
-    captureViewManage.removeCapture(index)
+    captureViewManage.removeCapture(parseInt(index))
   }
 
   function restoreCurrentCapture(e) {
@@ -161,13 +188,8 @@ const MainView = (props) => {
   function mouseoverCapture(e) { e.target.style.border = "2px solid black"; }
 
   function mouseoutCapture(e) { e.target.style.border = "1px solid black";}
-
-
-
   // NOTE about latent variables
-  const latentValNum = 5;
-  const latentValArray = new Array(latentValNum).fill(0);
-
+  
   function updateLatentValue(e) {
     const latentIdx = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
     latentValues[latentIdx] = e.target.value / 10;
@@ -204,13 +226,13 @@ const MainView = (props) => {
   // NOTE adjusting current location in latent embeddings
 
   let draggingLatentPos = false;
-  let dragStartPosition = [0, 0];
-  let dragCurrentPosition = [0, 0];
+  // let dragStartPosition;
+  let dragCurrentPosition;
   let draggingInterval;
 
   useEffect(() => {
+    // console.log('add dragging')      
     latentViewRef.current.addEventListener('mousedown',(e) => {
-      const paneSize = size * 0.5;
       const xCoor = 2 * (e.offsetX / paneSize) - 1;
       const yCoor = 2 * ((paneSize - e.offsetY) / paneSize) - 1;
       const dist2LatentCoor = Math.sqrt((xCoor - latentcoor[0]) * (xCoor - latentcoor[0]) 
@@ -219,9 +241,8 @@ const MainView = (props) => {
       if (distThreshold > dist2LatentCoor) {
         draggingLatentPos = true;
         // console.log()
-        dragStartPosition = [xCoor, yCoor];
+        // dragStartPosition = [xCoor, yCoor];
         dragCurrentPosition = [xCoor, yCoor];
-        console.log("Start dragging");
         draggingInterval = setInterval(() => {
           const latentData = {
             position: [dragCurrentPosition].concat(latentEmb)
@@ -249,34 +270,28 @@ const MainView = (props) => {
             latentValues.forEach((val, i) => {
               document.getElementById("latent" + i).value = val * 10;
             });
-            
-
+           
           })();
         }, 100)
       }
     });
 
     latentViewRef.current.addEventListener('mousemove', (e) => {
-      const paneSize = size * 0.5;
       const xCoor = 2 * (e.offsetX / paneSize) - 1;
       const yCoor = 2 * ((paneSize - e.offsetY) / paneSize) - 1;
       dragCurrentPosition = [xCoor, yCoor];
     });
-
-
-
+    
     latentViewRef.current.addEventListener('mouseup', (e) => {
       clearInterval(draggingInterval);
       if (draggingLatentPos) {
         draggingLatentPos = false;
         latentcoor = [dragCurrentPosition[0], dragCurrentPosition[1]];
-        console.log("End dragging");
+        // console.log("End dragging");
       }
     })
 
-  }, [])
-
-
+  }, [props])
   return (
      <div className="functionViews" style={{width: size * 2.5}}>
       <div 
@@ -286,24 +301,17 @@ const MainView = (props) => {
           height: size,
           margin: margin
         }}
+        ref={scrollRef}
       >
         <div style={{marginBottom: 10}}>
           Latent Space Exploration
         </div>
-        {latentValArray.map((_, i) => 
-           (<div className="hparam" key={i}>
-              <div className="hname">Val {i}</div> 
-              <input 
-                id={"latent" + i}
-                type="range"
-                min={-15} 
-                max={15}
-                defaultValue={0} 
-                className="slider"
-                onChange={updateLatentValue}
-              />
-           </div>)
-        )}
+        <ScrollBar
+          onChange={updateLatentValue}
+          url={url}
+          dataset={dataset}
+          pointNum={pointNum}
+        />
  
         <div style={{display: "flex"}}>
           <div style={{width: size * 0.5, height: size * 0.5}}>
