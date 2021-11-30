@@ -10,24 +10,27 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 
 import * as d3 from "d3";
 
-const load_len = (async(url, dataset, pointNum) => {
+const load_len = (async(url, dataset, pointNum, dom) => {
   await reload(url, dataset, pointNum).then(async () => {
     await getLatentEmb(url).then(res => {
-      document.querySelector('#num_emb').innerText = res.emb.length;
+      dom.current.innerText = res.emb.length;
     });
   })
 })
 
 
 
-const inputs = {
-  'spheres':[2000],
-  'grid10':[1000],
-  'grid6':[216, 1296, 7776],
-  'mammoth':[5000],
-  'interleaved':[2318],
-  'mnist': [1000]
-}
+
+let inputs = {}
+// let inputs = require('./json/info.json')
+const test = require('./json/info-property.json')
+let test_in = {}
+
+Object.keys(test).forEach(data => {
+  test_in[data] = (test[data].map(p => p.points))
+})
+
+inputs = test_in
 
 
 
@@ -42,6 +45,8 @@ function App() {
   const [data, setData] = useState({name, points});
   
   const pointNumSelect = useRef(null);
+
+  const numEmb = useRef(null);
 
   const updateData = useCallback(() => {
     pointNumSelect.current.innerHTML = '';
@@ -108,13 +113,13 @@ function App() {
   embCategoryColors(3);
   //일케일케
 
-  load_len(url, data.name, data.points)
+  load_len(url, data.name, data.points, numEmb)
   return (
     <div className="App">
       <header className="App-header">
         <div>
         <div>
-        Dimensionality Reduction Explorer utilizing VAE   #(embedding): <span id="num_emb"></span> </div>
+        Dimensionality Reduction Explorer utilizing VAE   #(embedding): <span ref={numEmb}></span> </div>
         </div>
       </header>
       <div id="body">
@@ -139,9 +144,7 @@ function App() {
           <ul className="dropdown-menu" aria-labelledby="dropdownDataset">
             {Object.keys(inputs).map(i => (<li><button className="dropdown-item" type="button" onClick={() => {
               if (i !== data.name){
-                console.log(data)
                 setData({name: i, points: inputs[i][0]});
-                console.log(data)
                 navigate(`/${i}/${inputs[i][0]}`);
               }
               }}>{i}</button></li>))}

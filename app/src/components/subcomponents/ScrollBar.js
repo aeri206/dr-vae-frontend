@@ -3,7 +3,6 @@ import { getDim } from '../../helpers/server';
 
 const ScrollBar = props => {
     const [dims, setDims] = useState(0);
-    console.log(props)
     console.log('scroll-bar')
 
     useEffect(() => {

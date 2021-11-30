@@ -1,0 +1,71 @@
+{
+    "spheres": [
+        {
+            "points": 2000,
+            "model":[ 
+                {
+                    "dim": 5,
+                    "idx": 1,
+                    "methods":["tsne", "umap"]
+                }
+            ]
+        }
+    ],
+    "grid6": [
+        {
+            "points": 7776,
+            "model":[{
+                "dim": 2,
+                "idx": 5,
+                "methods": ["umap", "densmap", "isomap"]
+            }]
+        }
+    ],
+    "mammoth": [
+        {
+            "points": 5000,
+            "model": [{
+                "dim": 5,
+                "idx": 2,
+                "methods": ["umap"]
+            },{
+                "dim": 2,
+                "idx": 3,
+                "methods": ["umap"]
+
+            },{
+                "dim": 5,
+                "idx": 6,
+                "methods": ["umap", "densmap", "isomap"]
+            },{
+                "dim": 2,
+                "idx": 7,
+                "methods": ["umap", "densmap", "isomap"]
+            }]
+        }
+    ],
+    "mnist": [
+        {
+            "points": 1000,
+            "model": [{
+                "dim": 5,
+                "idx": 0,
+                "methods": ["tsne", "umap"]
+            },{
+                "dim": 2,
+                "idx": 1,
+                "methods": ["tsne", "umap"]
+            },{
+                "dim": 5,
+                "idx": 6,
+                "methods": ["umap", "densmap", "isomap"]
+            },{
+                "dim": 2,
+                "idx": 7,
+                "methods": ["umap", "densmap", "isomap"]
+            }
+
+            ]
+        }
+    ]
+}
