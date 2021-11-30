@@ -4,6 +4,17 @@
             "points": 2000,
             "model":[ 
                 {
+                    "type": "VAE",
+                    "dim": 5,
+                    "idx": 1,
+                    "methods":["tsne", "umap"]
+                }
+            ]
+        },{
+            "points": 2000,
+            "model":[ 
+                {
+                    "type": "VAE",
                     "dim": 5,
                     "idx": 1,
                     "methods":["tsne", "umap"]
@@ -15,6 +26,7 @@
         {
             "points": 7776,
             "model":[{
+                "type": "VAE", 
                 "dim": 2,
                 "idx": 5,
                 "methods": ["umap", "densmap", "isomap"]
@@ -25,19 +37,23 @@
         {
             "points": 5000,
             "model": [{
+                "type": "VAE",
                 "dim": 5,
                 "idx": 2,
                 "methods": ["umap"]
             },{
+                "type": "VAE",
                 "dim": 2,
                 "idx": 3,
                 "methods": ["umap"]
 
             },{
+                "type": "VAE",
                 "dim": 5,
                 "idx": 6,
                 "methods": ["umap", "densmap", "isomap"]
             },{
+                "type": "VAE",
                 "dim": 2,
                 "idx": 7,
                 "methods": ["umap", "densmap", "isomap"]
@@ -48,18 +64,22 @@
         {
             "points": 1000,
             "model": [{
+                "type": "VAE",
                 "dim": 5,
                 "idx": 0,
                 "methods": ["tsne", "umap"]
             },{
+                "type": "VAE",
                 "dim": 2,
                 "idx": 1,
                 "methods": ["tsne", "umap"]
             },{
+                "type": "VAE",
                 "dim": 5,
                 "idx": 6,
                 "methods": ["umap", "densmap", "isomap"]
             },{
+                "type": "VAE",
                 "dim": 2,
                 "idx": 7,
                 "methods": ["umap", "densmap", "isomap"]

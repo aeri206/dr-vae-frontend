@@ -10,15 +10,16 @@ import { getLatentEmb, reconstruction, getKnn, latentCoorToOthers, reload } from
 import { useParams } from "react-router-dom";
 // import { deepcopyArr } from '../helpers/utils';
 import ScrollBar from './subcomponents/ScrollBar';
+import { Paper, Box, Grid } from '@mui/material';
 
 
 
 const MainView = (props) => {
   let params = useParams();
   
-  // console.log('mainview', params)
   const pointNum = parseInt(params.pointNum);
   const dataset = params.dataset;
+  const idx = parseInt(params.idx)
   let labelData = require(`../json/${dataset}-${pointNum.toString()}-label.json`);
       if (typeof labelData === 'object' && labelData !== null){
         labelData = Object.values(labelData)
@@ -34,15 +35,13 @@ const MainView = (props) => {
 
 
   // CONSTANTs for managing layout / design
-  const radius = props.radius;
-  const size   = props.size;
-  const paneSize = size * 0.5;
-  const margin = props.margin;
-  const methods = props.methods;
   
-  const url = props.url;
+  const { radius, size, margin, methods, url, info } = props;
   
-  const scrollRef = useRef(null);
+
+  const paneSize = size * 0.6;
+
+  
   const mainViewRef = useRef(null);
   const latentViewRef = useRef(null);
   const simEmbSvgRef = useRef(null);
@@ -117,8 +116,8 @@ const MainView = (props) => {
           
           simEmbBarChart = new barChart(
             simEmbSvgRef, 
-            size * 0.4, 
-            size * 0.405, 
+            size * 0.35, 
+            size * 0.56, 
             margin,
             methods
           );
@@ -210,8 +209,7 @@ const MainView = (props) => {
         acc[curr] += 1;
         return acc;
       }, [0, 0, 0, 0, 0])
-      // console.log(labelNums);
-
+      
       simEmbBarChart.update(labelNums, 10);
       const latentData = {
         position: [latentcoor].concat(latentEmb)
@@ -233,10 +231,13 @@ const MainView = (props) => {
   useEffect(() => {
     // console.log('add dragging')      
     latentViewRef.current.addEventListener('mousedown',(e) => {
+      console.log('addDragging')
       const xCoor = 2 * (e.offsetX / paneSize) - 1;
       const yCoor = 2 * ((paneSize - e.offsetY) / paneSize) - 1;
+      
       const dist2LatentCoor = Math.sqrt((xCoor - latentcoor[0]) * (xCoor - latentcoor[0]) 
                                       + (yCoor - latentcoor[1]) * (yCoor - latentcoor[1]));  
+       console.log(xCoor, yCoor, e.offsetX, e.offsetY, dist2LatentCoor)
       const distThreshold = radius * 8 / (size * 10);           
       if (distThreshold > dist2LatentCoor) {
         draggingLatentPos = true;
@@ -293,39 +294,80 @@ const MainView = (props) => {
 
   }, [props])
   return (
-     <div className="functionViews" style={{width: size * 2.5}}>
-      <div 
+    <Box component="div"
+      sx={{width: size * 2.5,
+        // border: '1px solid grey',
+        borderRadius: '5px',
+        display: 'flex',
+        marginTop: '10px',
+        }}>
+          <Grid container spacing={0}>
+          <Grid  container item spacing={1} xs={5}>
+            <Box>
+      {/* <div 
         id={"latentview"}
         style={{
           width: size,
           height: size,
           margin: margin
+          
         }}
-        ref={scrollRef}
-      >
-        <div style={{marginBottom: 10}}>
+      > */}
+        <Paper
+          sx={{
+            boxShadow: 1,
+            borderRadius: 1,
+            margin: '5ox',
+            padding: '5px',
+            height: '100%'
+          }}
+          >
+        <div style={{marginBottom: 5}}>
           Latent Space Exploration
         </div>
         <ScrollBar
+          dims={info[dataset].find(d => d.points == pointNum).model.find(m => m.idx == idx).dim}
           onChange={updateLatentValue}
           url={url}
           dataset={dataset}
           pointNum={pointNum}
         />
+
  
         <div style={{display: "flex"}}>
-          <div style={{width: size * 0.5, height: size * 0.5}}>
+          <div style={{width: size * 0.4, height: paneSize}}>
             Similar Embeddings
             <svg ref={simEmbSvgRef}></svg>
           </div>
+          <div>
+            Dimensionally-Reduced Latent Space
           <canvas
             ref={latentViewRef}
             width={size * 2}
             height={size * 2}
-            style={scatterplotStyle(size * 0.5)}
+            style={{
+              border: "1px black solid",
+              width: paneSize,
+              height: paneSize,
+
+            }}
           ></canvas>
+          </div>
         </div>
-      </div>
+      {/* </div> */}
+      </Paper>
+      </Box>
+  </Grid>
+  <Grid item spacing={1} xs={5}>
+    <Box>
+      <Paper
+      sx={{
+        boxShadow: 1,
+        borderRadius: 1,
+        margin: '5ox',
+        padding: '5px',
+      }}
+      >
       <div
         id={"mainview"}
         style={{
@@ -342,53 +384,68 @@ const MainView = (props) => {
         ></canvas>
 
       </div>
-      <div
-        id={"captureView"}
-        style={{
-          marginTop: margin,
-          width: size * 0.38,
-          height: size,
-        }}
-      >
-        <div 
-          style={{height: size - 21, width: size * 0.38}}
-          ref={captureViewRef}
+      </Paper>
+      </Box>
+      </Grid>
+      <Grid item xs={2}>
+      <Paper
+          sx={{
+            boxShadow: 1,
+            borderRadius: 1,
+            margin: '5ox',
+            padding: '5px',
+            height: '100%'
+          }}
+          >
+        <div
+          id={"captureView"}
+          style={{
+            marginTop: margin,
+            width: size * 0.38,
+            height: size,
+          }}
         >
-          {
-            [0, 0, 0].map((d, i) => {
-              return (
-                <div 
-                  key={i} 
-                  id={"capture" + i}
-                  style={{display:'flex', marginBottom: 4, visibility: "hidden"}}
-                >
-                  <canvas 
-                    id={"capturecanvas" + i}
-                    width={size * 1.4}
-                    height={size * 1.4}
-                    style={scatterplotStyle(size * 0.3)}
-                    onClick={restoreCurrentCapture}
-                    onMouseOver={mouseoverCapture}
-                    onMouseOut={mouseoutCapture}
-                  ></canvas>
-                  <button 
-                    id={"capturebutton" + i}
-                    style={{
-                      marginLeft: 5,
-                      height: 22
-                    }}
-                    onClick={removeCurrentCapture}
-                  >X</button>
-                 </div>
-              )
-            })
-          }
+          <div 
+            style={{height: size - 21, width: size * 0.38}}
+            ref={captureViewRef}
+          >
+            {
+              [0, 0, 0].map((d, i) => {
+                return (
+                  <div 
+                    key={i} 
+                    id={"capture" + i}
+                    style={{display:'flex', marginBottom: 4, visibility: "hidden"}}
+                  >
+                    <canvas 
+                      id={"capturecanvas" + i}
+                      width={size * 1.4}
+                      height={size * 1.4}
+                      style={scatterplotStyle(size * 0.3)}
+                      onClick={restoreCurrentCapture}
+                      onMouseOver={mouseoverCapture}
+                      onMouseOut={mouseoutCapture}
+                    ></canvas>
+                    <button 
+                      id={"capturebutton" + i}
+                      style={{
+                        marginLeft: 5,
+                        height: 22
+                      }}
+                      onClick={removeCurrentCapture}
+                    >X</button>
+                  </div>
+                )
+              })
+            }
+          </div>
+          <button style={{width: size * 0.38, height: 23}} onClick={captureCurrentEmbedding}>Click to Capture!!</button>
         </div>
-        <button style={{width: size * 0.38, height: 23}} onClick={captureCurrentEmbedding}>Click to Capture!!</button>
-      </div>
-     </div>
+      </Paper>
+      </Grid>
+      </Grid>
+     </Box>
   )
-
 }
 
 

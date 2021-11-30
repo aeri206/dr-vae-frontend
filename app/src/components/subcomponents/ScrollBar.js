@@ -2,17 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { getDim } from '../../helpers/server';
 
 const ScrollBar = props => {
-    const [dims, setDims] = useState(0);
-    console.log('scroll-bar')
+    const { dims } = props;
+    // console.log(props)
+    // const [dims, setDims] = useState(0);
 
-    useEffect(() => {
-        (async () => {
-            await getDim(props.url, props.dataset, props.pointNum).then(res => {
-                setDims(res)
-            });
-        })();
+    // useEffect(() => {
+    //     (async () => {
+    //         await getDim(props.url, props.dataset, props.pointNum).then(res => {
+    //             setDims(res)
+    //         });
+    //     })();
 
-    }, [props]);
+    // }, [props]);
 
     return(<div>
         {Array(dims).fill(0).map((_, i) => (

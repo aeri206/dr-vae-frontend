@@ -1,10 +1,25 @@
 import './App.css';
 // import FileUpload from './components/FileUpload';
 import { Route, Routes, Navigate, useNavigate, useLocation} from "react-router-dom";
-import './components/MainView';
+
 import MainView from './components/MainView';
+import SideBar from './components/subcomponents/SideBar';
+
 import { getLatentEmb, reload} from './helpers/server';
 import { useEffect, useState, useRef, useCallback } from 'react';
+
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+import AppBar from '@mui/material/AppBar';
+import CssBaseline from '@mui/material/CssBaseline';
+import Toolbar from '@mui/material/Toolbar';
+import List from '@mui/material/List';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+
 
 
 
@@ -22,9 +37,10 @@ const load_len = (async(url, dataset, pointNum, dom) => {
 
 
 let inputs = {}
+let test_in = {}
 // let inputs = require('./json/info.json')
 const test = require('./json/info-property.json')
-let test_in = {}
+
 
 Object.keys(test).forEach(data => {
   test_in[data] = (test[data].map(p => p.points))
@@ -34,65 +50,38 @@ inputs = test_in
 
 
 
-
 function App() {
   const { pathname } = useLocation();
-  let navigate = useNavigate();
-
-  let name = (pathname.split("/").length > 2) ? pathname.split("/")[1] : 'mnist';
-  let points = (pathname.split("/").length > 2) ? parseInt(pathname.split("/")[2]) : inputs['mnist'][0];
+  let checkIdx = false;
   
-  const [data, setData] = useState({name, points});
-  
-  const pointNumSelect = useRef(null);
+  let name, points, idx;
 
-  const numEmb = useRef(null);
-
-  const updateData = useCallback(() => {
-    pointNumSelect.current.innerHTML = '';
-    pointNumSelect.current.append()
-    inputs[data.name].forEach(size => {
-      let li = document.createElement('li');
-      let btn = document.createElement('button');
-      btn.classList.add("dropdown-item");
-      btn.setAttribute("type", "button");
-      btn.setAttribute("value", size)
-
-      btn.addEventListener('click', () => {
-        if (size !== data.points){
-          navigate(`/${data.name}/${size}`)
-        }
-      })
-      btn.innerText = size;
-      pointNumSelect.current.appendChild(li.appendChild(btn));
-    });
-
-  }, [data.name, data.points, navigate])
-
-  useEffect(() => {
-    updateData();
-    // pointNumSelect.current.innerHTML = '';
-    // pointNumSelect.current.append()
-    // inputs[data.name].forEach(size => {
-    //   let li = document.createElement('li');
-    //   let btn = document.createElement('button');
-    //   btn.classList.add("dropdown-item");
-    //   btn.setAttribute("type", "button");
-    //   btn.setAttribute("value", size)
-
-    //   btn.addEventListener('click', () => {
-    //     if (size !== data.points){
-    //       navigate(`/${data.name}/${size}`)
-    //     }
-    //   })
-    //   btn.innerText = size;
-    //   pointNumSelect.current.appendChild(li.appendChild(btn));
-    // });
-  }, [data.name, updateData])
-
-  if (data.points !== points){
-    setData({...data, points: points})
+  name = (pathname.split("/").length > 1) ? pathname.split("/")[1] : 'mnist';
+  if (Object.keys(test).includes(name)){
+    points = (pathname.split("/").length > 2) ? parseInt(pathname.split("/")[2]) : inputs['mnist'][0];
+    if (test[name].find(d => d.points == points)){
+      idx = (pathname.split("/").length > 3) ? parseInt(pathname.split("/")[3]): -1;
+      if (test[name].find(d => d.points == points).model.find(m => m.idx == idx)){
+        checkIdx = true;
+      }
+      else {
+        idx = test[name].find(d => d.points == points).model[0].idx;
+      }
+    } else {
+      console.log(test[name])
+      points = test[name][0].points;
+      idx = test[name][0].model[0].idx;
+    }
   }
+  else {
+    name = 'mnist';
+    points = inputs[name][0];
+    idx = test[name].find(d => d.points == points).model[0].idx;
+  }
+  
+  const data = {name, points, idx}
+  // const [data, setData] = useState({name, points, idx});
+  const numEmb = useRef(null);
 
   const size   = 600;
   const radius = 20;
@@ -115,14 +104,29 @@ function App() {
 
   load_len(url, data.name, data.points, numEmb)
   return (
-    <div className="App">
-      <header className="App-header">
-        <div>
-        <div>
-        Dimensionality Reduction Explorer utilizing VAE   #(embedding): <span ref={numEmb}></span> </div>
-        </div>
-      </header>
-      <div id="body">
+    <Box sx={{ display: 'flex' }}>
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <Typography variant="h6" noWrap component="div">
+          Dimensionality Reduction Explorer utilizing Generative Model   #(embedding): <span ref={numEmb}></span>
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: 150,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: 150, boxSizing: 'border-box' },
+        }}
+      >
+         <Toolbar />
+         <SideBar
+          info={test}
+          data={checkIdx?data:null}
+         />
+        </Drawer>
+
         {/* <div style={{display: "flex"}}>
           <FileUpload
             width={size * 0.8 - 20}
@@ -139,41 +143,41 @@ function App() {
             labelData={labelData}
           />
         </div> */}
-        <div className="dropdown">
-          <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownDataset" data-bs-toggle="dropdown" aria-expanded="false">Dataset: {data.name}</button>
-          <ul className="dropdown-menu" aria-labelledby="dropdownDataset">
-            {Object.keys(inputs).map(i => (<li><button className="dropdown-item" type="button" onClick={() => {
-              if (i !== data.name){
-                setData({name: i, points: inputs[i][0]});
-                navigate(`/${i}/${inputs[i][0]}`);
-              }
-              }}>{i}</button></li>))}
-          </ul>
-        </div>
-        <div className="dropdown">
-          <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownPointNum" data-bs-toggle="dropdown" aria-expanded="false"># points: {data.points}</button>
-          <ul className="dropdown-menu" aria-labelledby="dropdownPointNum" ref={pointNumSelect}>
-          </ul>
-        </div>
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
         <Routes>
-        <Route path="/" element={<Navigate replace to={`/${data.name}/${data.points}`} />} />
-          <Route path=":dataset/:pointNum" element={
-          <MainView
-          size={size} 
-          radius={radius}
-          margin={margin}
-          methods={methods}
-          // embCategoryColors={embCategoryColors}
-          // labelColors={labelColors}
-          // data={propsData}
-          // pointNum={propsPointNum}
-          // labelData={labelData}
-          url={url}
-        />
-          } />
+        <Route path="/" element={<Navigate replace to={`/${data.name}/${data.points}/${data.idx}`} />} />
+        <Route path=":dataset/:pointNum/" element={
+          <Navigate replace to={`/${data.name}/${data.points}/${data.idx}`} />
+        }
+          />
+            {
+              !checkIdx && 
+              <Route path="/*" element={
+                <Navigate replace to={`/${data.name}/${data.points}/${data.idx}`} />
+              } />
+            }
+            {
+              checkIdx && 
+          <Route path=":dataset/:pointNum/:idx" element={
+            <MainView
+            size={size}
+            radius={radius}
+            margin={margin}
+            methods={methods}
+            info={test}
+            // embCategoryColors={embCategoryColors}
+            // labelColors={labelColors}
+            // data={propsData}
+            // pointNum={propsPointNum}
+            // labelData={labelData}
+            url={url}
+          />
+            } />
+          }
         </Routes>
-      </div>
-    </div>
+        </Box>
+    </Box>
   );
 }
 
