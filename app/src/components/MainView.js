@@ -4,13 +4,15 @@ import * as d3 from "d3";
 import { Scatterplot } from "./subcomponents/scatterplot";
 import { scatterplotStyle } from './subcomponents/styles';
 import { barChart } from './subcomponents/barChart';
+import SimEmbView from './SimEmbView';
 import { CaptureViewManage } from './subcomponents/captureViewManage'
 import  "../css/mainview.css"
 import { getLatentEmb, reconstruction, getKnn, latentCoorToOthers, reload } from '../helpers/server';
 import { useParams } from "react-router-dom";
 // import { deepcopyArr } from '../helpers/utils';
 import ScrollBar from './subcomponents/ScrollBar';
-import { Paper, Box, Grid } from '@mui/material';
+import { Paper, Box, Grid, Button, Typography, Divider } from '@mui/material';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 
 
@@ -36,8 +38,9 @@ const MainView = (props) => {
 
   // CONSTANTs for managing layout / design
   
-  const { radius, size, margin, methods, url, info } = props;
+  const { radius, size, margin, methodsNum, url, info, dim } = props;
   
+  const methods = Object.keys(methodsNum)
 
   const paneSize = size * 0.6;
 
@@ -52,7 +55,7 @@ const MainView = (props) => {
 
   // CONSTANT datas (latent values / current embedding)
   let emb;
-  let latentValues = [0, 0, 0, 0, 0];
+  let latentValues = Array(dim).fill(0)
   
   let latentcoor;
 
@@ -85,10 +88,11 @@ const MainView = (props) => {
             borderColor: colorData,
             radius: new Array(emb.length).fill(radius),
           }
+          // console.log(mainViewRef)
           mainViewSplot = new Scatterplot(data, mainViewRef.current);
           
           const latentEmbData = await getLatentEmb(url);
-          const latentKnnData = await getKnn(url, latentValues);
+          const latentKnnData = await getKnn(url, latentValues, -1);
       
           latentEmb = latentEmbData.emb;
           latentLabel = latentEmbData.label;
@@ -114,6 +118,7 @@ const MainView = (props) => {
       
           latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
           
+          // methods 다를떄 어떻게 할지 고민
           simEmbBarChart = new barChart(
             simEmbSvgRef, 
             size * 0.35, 
@@ -163,7 +168,7 @@ const MainView = (props) => {
       document.getElementById("latent" + i).value = val * 10;
     });
     (async () => {
-      const latentKnnData = await getKnn(url, currlatentValues);
+      const latentKnnData = await getKnn(url, currlatentValues, -1);
       // console.log(latentKnnData)
 
       latentcoor = latentKnnData.coor;
@@ -188,10 +193,48 @@ const MainView = (props) => {
 
   function mouseoutCapture(e) { e.target.style.border = "1px solid black";}
   // NOTE about latent variables
+
+  const restoreSimView = (values) => (e) => {
+    latentValues = values;
+
+    (async () => {
+      emb = await reconstruction(url, latentValues);
+      const data = {
+        position: emb
+      }
+      mainViewSplot.update(data, 1000, 0);
+    })();
+
+    latentValues.forEach((val, i) => {
+      document.getElementById("latent" + i).value = val * 10;
+    });
+
+    (async () => {
+      const data = await getKnn(url, latentValues, -1);
+      latentcoor = data.coor;
+      const labels = data.labels;      
+      const labelNums = labels.reduce((acc, curr) => {
+        acc[curr] += 1;
+        return acc;
+      }, [0, 0, 0, 0, 0])
+      
+      simEmbBarChart.update(labelNums, 1000);
+      const latentData = {
+        position: [latentcoor].concat(latentEmb)
+      }
+
+      latentViewSplot.update(latentData, 1000, 0)
+
+    })();
+
+  }
+
+  const onUpdate = () => latentValues
   
   function updateLatentValue(e) {
     const latentIdx = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
     latentValues[latentIdx] = e.target.value / 10;
+    
 
     (async () => {
       emb = await reconstruction(url, latentValues);
@@ -201,10 +244,11 @@ const MainView = (props) => {
       mainViewSplot.update(data, 50, 0);
     })();
 
+    
     (async () => {
-      const data = await getKnn(url, latentValues);
+      const data = await getKnn(url, latentValues, -1);
       latentcoor = data.coor;
-      const labels = data.labels;
+      const labels = data.labels;      
       const labelNums = labels.reduce((acc, curr) => {
         acc[curr] += 1;
         return acc;
@@ -231,14 +275,13 @@ const MainView = (props) => {
   useEffect(() => {
     // console.log('add dragging')      
     latentViewRef.current.addEventListener('mousedown',(e) => {
-      console.log('addDragging')
+      // console.log('addDragging')
       const xCoor = 2 * (e.offsetX / paneSize) - 1;
       const yCoor = 2 * ((paneSize - e.offsetY) / paneSize) - 1;
       
       const dist2LatentCoor = Math.sqrt((xCoor - latentcoor[0]) * (xCoor - latentcoor[0]) 
                                       + (yCoor - latentcoor[1]) * (yCoor - latentcoor[1]));  
-       console.log(xCoor, yCoor, e.offsetX, e.offsetY, dist2LatentCoor)
-      const distThreshold = radius * 8 / (size * 10);           
+       const distThreshold = radius * 8 / (size * 10);           
       if (distThreshold > dist2LatentCoor) {
         draggingLatentPos = true;
         // console.log()
@@ -293,6 +336,7 @@ const MainView = (props) => {
     })
 
   }, [props])
+  console.log('main')
   return (
     <Box component="div"
       sx={{width: size * 2.5,
@@ -301,7 +345,7 @@ const MainView = (props) => {
         display: 'flex',
         marginTop: '10px',
         }}>
-          <Grid container spacing={0}>
+          <Grid container spacing={1}>
           <Grid  container item spacing={1} xs={5}>
             <Box>
       {/* <div 
@@ -326,7 +370,7 @@ const MainView = (props) => {
           Latent Space Exploration
         </div>
         <ScrollBar
-          dims={info[dataset].find(d => d.points == pointNum).model.find(m => m.idx == idx).dim}
+          dims={dim}
           onChange={updateLatentValue}
           url={url}
           dataset={dataset}
@@ -406,7 +450,7 @@ const MainView = (props) => {
           }}
         >
           <div 
-            style={{height: size - 21, width: size * 0.38}}
+            style={{height: size - 30, width: size * 0.38}}
             ref={captureViewRef}
           >
             {
@@ -439,10 +483,24 @@ const MainView = (props) => {
               })
             }
           </div>
-          <button style={{width: size * 0.38, height: 23}} onClick={captureCurrentEmbedding}>Click to Capture!!</button>
+          <Button 
+            variant="outlined" sx={{width: size * 0.38, marginBottom: '5px'}}
+            onClick={captureCurrentEmbedding}
+            startIcon={<CameraAltIcon />}>
+              Click to Capture!!
+              </Button>
         </div>
       </Paper>
       </Grid>
+      <SimEmbView
+        size={size}
+        colorData={colorData}
+        n={8}
+        latentValues={latentValues}
+        restoreSimView={restoreSimView}
+        onUpdate={onUpdate}
+        url={url}
+      />
       </Grid>
      </Box>
   )

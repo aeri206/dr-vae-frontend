@@ -33,12 +33,16 @@ export async function getLatentEmb(url) {
 	return data;
 }
 
-export async function getKnn(url, latentValues) {
+export async function getKnn(url, latentValues, n) {
 	let knn;
 	await axios.get(url + "getknn", {
-		params: { latentValues: { data: latentValues } }
+		params: { latentValues: { data: latentValues }, n:n }
 	}).then(response => {
+		
 		knn = response.data;
+		if (n > 0){
+			knn.embs = knn.embs.map(emb => embScale(emb))
+		}
 	})
 	return knn;
 }

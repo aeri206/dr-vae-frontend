@@ -28,7 +28,8 @@ import * as d3 from "d3";
 const load_len = (async(url, dataset, pointNum, dom) => {
   await reload(url, dataset, pointNum).then(async () => {
     await getLatentEmb(url).then(res => {
-      dom.current.innerText = res.emb.length;
+      console.log(dom.current)
+      // dom.current.innerText = res.emb.length;
     });
   })
 })
@@ -46,7 +47,7 @@ Object.keys(test).forEach(data => {
   test_in[data] = (test[data].map(p => p.points))
 })
 
-inputs = test_in
+inputs = test_in;
 
 
 
@@ -55,6 +56,7 @@ function App() {
   let checkIdx = false;
   
   let name, points, idx;
+  let dim;
 
   name = (pathname.split("/").length > 1) ? pathname.split("/")[1] : 'mnist';
   if (Object.keys(test).includes(name)){
@@ -63,6 +65,7 @@ function App() {
       idx = (pathname.split("/").length > 3) ? parseInt(pathname.split("/")[3]): -1;
       if (test[name].find(d => d.points == points).model.find(m => m.idx == idx)){
         checkIdx = true;
+        dim = test[name].find(d => d.points == points).model.find(m => m.idx == idx).dim;
       }
       else {
         idx = test[name].find(d => d.points == points).model[0].idx;
@@ -86,7 +89,8 @@ function App() {
   const size   = 600;
   const radius = 20;
   const margin = 10;
-  const methods = ["umap", "tsne", "isomap", "densmap", "lle"];
+  const methodsNum = {'umap': 0, 'tsne': 1, 'isomap': 2, 'densmap': 3, 'lle': 4};
+  // const methodsIdx = require('.')
   const embCategoryColors = d3.scaleOrdinal(d3.schemeDark2);
   const url = "http://127.0.0.1:5000/";
   // let labelData = require(`./json/${data}-${pointNum.toString()}-label.json`);
@@ -102,13 +106,13 @@ function App() {
   embCategoryColors(3);
   //일케일케
 
-  load_len(url, data.name, data.points, numEmb)
+  // load_len(url, data.name, data.points, numEmb)
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-          Dimensionality Reduction Explorer utilizing Generative Model   #(embedding): <span ref={numEmb}></span>
+          Dimensionality Reduction Explorer utilizing Generative Model
           </Typography>
         </Toolbar>
       </AppBar>
@@ -121,10 +125,13 @@ function App() {
         }}
       >
          <Toolbar />
+         {checkIdx && 
          <SideBar
           info={test}
-          data={checkIdx?data:null}
+          data={data}
+          url={url}
          />
+         }
         </Drawer>
 
         {/* <div style={{display: "flex"}}>
@@ -164,8 +171,8 @@ function App() {
             size={size}
             radius={radius}
             margin={margin}
-            methods={methods}
-            info={test}
+            methodsNum={methodsNum}
+            dim={dim}
             // embCategoryColors={embCategoryColors}
             // labelColors={labelColors}
             // data={propsData}

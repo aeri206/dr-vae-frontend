@@ -5,19 +5,9 @@
             "model":[ 
                 {
                     "type": "VAE",
-                    "dim": 5,
-                    "idx": 1,
-                    "methods":["tsne", "umap"]
-                }
-            ]
-        },{
-            "points": 2000,
-            "model":[ 
-                {
-                    "type": "VAE",
-                    "dim": 5,
-                    "idx": 1,
-                    "methods":["tsne", "umap"]
+                    "dim": 2,
+                    "idx": 3,
+                    "methods": ["umap", "densmap", "isomap"]
                 }
             ]
         }
