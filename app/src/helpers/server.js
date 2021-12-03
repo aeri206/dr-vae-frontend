@@ -29,6 +29,8 @@ export async function getLatentEmb(url) {
 	let data;
 	await axios.get(url + "getlatentemb").then(response => {
 		data = response.data;
+		data.vec = embScale(data.vec)
+		
 	})
 	return data;
 }
@@ -59,10 +61,10 @@ export async function latentCoorToOthers(url, coor) {
 	return data;
 }
 
-export async function reload(url, dataset, pointNum) {
+export async function reload(url, dataset, pointNum, idx) {
 	let latent_dims;
 	await axios.get(url + "reload", {
-		params: { dataset, pointNum }
+		params: { dataset, pointNum, idx }
 	}).then(res => {
 		latent_dims = res.data
 	});

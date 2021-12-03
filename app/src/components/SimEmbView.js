@@ -2,14 +2,30 @@ import React, { createRef, useEffect, useRef, useState } from 'react';
 import { Grid, Box, Paper, Button, Divider, Typography } from '@mui/material';
 import { getKnn } from '../helpers/server';
 import { Scatterplot } from './subcomponents/scatterplot';
+import * as d3 from "d3";
 
 
+const methodsNum = ['umap', 'tsne', 'isomap', 'densmap', 'lle']
+
+function embScale(embedding) {
+	const xMax = d3.max(embedding.map(d => d[0]));
+	const xMin = d3.min(embedding.map(d => d[0]));
+	const yMax = d3.max(embedding.map(d => d[1]));
+	const yMin = d3.min(embedding.map(d => d[1]));
+	const xScale = d3.scaleLinear().domain([xMin, xMax]).range([-0.9, 0.9]);
+	const yScale = d3.scaleLinear().domain([yMin, yMax]).range([-0.9, 0.9]);
+	return embedding.map((d) => {
+		return [xScale(d[0]), yScale(d[1])];
+	});
+}
 
 const SimEmbView = props => {
+
   
-  console.log('simEmbView')
   let { latentValues } = props;
   const { size, url, n, colorData, restoreSimView, onUpdate } = props;
+
+  
 
 
   let simSPlotsContainerRefs = useRef([]);
@@ -21,13 +37,44 @@ const SimEmbView = props => {
   let simSplotLatentValues = useRef([]);
   simSplotLatentValues.current = Array(n).fill(0).map((_, i) => simSplotLatentValues.current[i] ?? createRef());
 
+  let originEmbeddings = useRef([]);
+  originEmbeddings.current = Array(n).fill(0).map((_, i) => originEmbeddings.current[i] ?? createRef());
+
+  let reconEmbeddings = useRef([]);
+  reconEmbeddings.current = Array(n).fill(0).map((_, i) => reconEmbeddings.current[i] ?? createRef());
+
+  let originParams = useRef([]);
+  originParams.current = Array(n).fill(0).map((_, i) => originParams.current[i] ?? createRef());
+
   
   
-  const [update, setUpdate] = useState(false);
+  const [show, setShow] = useState(false);
+  const [hasData, setHasData] = useState(false);
+  const [showRecon, setShowRecon] = useState(true);
 
   const radius = 8;
 
+
+  useEffect(() => {
+
+    setShow(false)
+    setHasData(false)
+    setShowRecon(true)
+
+  }, [props])
+
   
+  useEffect(() => {
+    if (simSPlotsContainerRefs.current[0].current){
+      Array(n).fill(0).map((_, idx) => {
+        let pos = showRecon? reconEmbeddings.current[idx].current : originEmbeddings.current[idx].current
+        // simSPlotsContainerRefs.current[idx].current.update({ position: d}, 50, 0);
+        simSPlotsContainerRefs.current[idx].current.update({ position: pos}, 50, 0);
+      })
+
+    }
+
+  }, [showRecon])
 
   
   const onClick = (async(values) => {
@@ -36,19 +83,40 @@ const SimEmbView = props => {
     
     const data = await getKnn(url, latentValues, n);
     
+    data.files.forEach((d, i) => {
+      console.log(d)
+      originEmbeddings.current[i].current = embScale(d.emb);
+      
+      
+      delete d.emb;
+      d['method'] = methodsNum[data.labels[i]]
+      originParams.current[i].current = d;
+      console.log(d)
+    })
+    
+    
     data.latents.forEach((d, i) => {
       simSplotLatentValues.current[i].current = d;
     })
 
-    // simSplotLatentValues = simSplotLatentValues.map((_, i) => data.latents[i])
-    setUpdate(true)
+    data.embs.forEach((d, i) => {
+      reconEmbeddings.current[i].current = d;
+    })
+    
+    setShow(true);
+    setHasData(true);
+    
+    
     if (simSPlotsContainerRefs.current[0].current){
-      data.embs.forEach((d, idx) => {
-        simSPlotsContainerRefs.current[idx].current.update({ position: d}, 50, 0);
-        
+      data.embs.forEach((_, idx) => {
+        let pos = showRecon? reconEmbeddings.current[idx].current : originEmbeddings.current[idx].current
+        // simSPlotsContainerRefs.current[idx].current.update({ position: d}, 50, 0);
+        simSPlotsContainerRefs.current[idx].current.update({ position: pos}, 50, 0);
       });
     }
     else { // construct
+      
+      console.log('create')
       let sc  = data.embs.map((d, idx) => {
         // d; point_count, 2
         const sdata = {
@@ -70,13 +138,23 @@ const SimEmbView = props => {
     }
   })
 
+  // console.log(originEmbeddings.current, 
+  // originParams.current[i].current
+  // {(Object.entries(originParams.current[i].current)).forEach((k, v) => {
+  //   return(
+  //     <div>HIHI</div>
+
+
+  //   )
+  // })}
+
     return(<>
     <Grid container spacing={1} item xs={10}>
         <Box sx={{width: '100%'}}>
           <Paper>
             <div style={{marginBottom: 5}}>
-              Top {n} similar original embeddings
-            </div>
+              Top {n} similar {showRecon? 'reconstructed': 'original'} embeddings
+              </div>
             <Button
                 variant="outlined"
                 sx={{margin: '5px'}}
@@ -88,18 +166,36 @@ const SimEmbView = props => {
             >
                 Update</Button>
                 <Button
-                variant="outlined"
-                sx={{margin: '5px'}}
-                onClick={() => {setUpdate(u => !u)}}
+                variant="outlined" // TODO
+                sx={{ display:hasData? 'inline-flex': 'none'}}
+                
+                onClick={() => {setShow(u => !u)}}
                 >
-                  {update? 'HIDE': 'SHOW'}
-                </Button>
+                  {show? 'HIDE': 'SHOW'} 
+                  
+                </Button> 
+                <Button
+                  variant="outlined"
+                  sx={{margin: '5px', display:hasData? 'inline-flex': 'none'}}
+                  onClick={() => {
+                    if (hasData){
+                      setShowRecon(s => !s)
+                      setShow(true)
+                    }
+                    
+                  }}
+              >
+                SHOW {showRecon? 'original': 'reconstructed'} embeddings
+              </Button>
                 
             <Divider sx={{margin: '0 5px 0 5px'}}/>
-            {update && 
-            <Grid container>
+            {hasData && 
+            <Grid container
+              sx={{display:show?'flex': 'none' }}
+            >
               {Array(n).fill(0).map((_, i) => {
                 return(
+                  
                   <Grid item xs={3}>
                     <div style={{margin: '5px'}} onClick={() => {
                       restoreSimView(simSplotLatentValues.current[i].current)();
@@ -116,11 +212,15 @@ const SimEmbView = props => {
                         }}
                       >
                       </canvas>
+                      <Box>
+                        {Object.keys(originParams.current[i].current).map(k => {
+                          return(
+                          <div>{k} : {originParams.current[i].current[k]}</div>
+                          )})}
 
+                      </Box>
                     </div>
                     
-
-                    <Box> Text </Box>
 
                   </Grid>
 

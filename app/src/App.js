@@ -5,7 +5,6 @@ import { Route, Routes, Navigate, useNavigate, useLocation} from "react-router-d
 import MainView from './components/MainView';
 import SideBar from './components/subcomponents/SideBar';
 
-import { getLatentEmb, reload} from './helpers/server';
 import { useEffect, useState, useRef, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
@@ -24,16 +23,6 @@ import ListItemText from '@mui/material/ListItemText';
 
 
 import * as d3 from "d3";
-
-const load_len = (async(url, dataset, pointNum, dom) => {
-  await reload(url, dataset, pointNum).then(async () => {
-    await getLatentEmb(url).then(res => {
-      console.log(dom.current)
-      // dom.current.innerText = res.emb.length;
-    });
-  })
-})
-
 
 
 
@@ -106,7 +95,6 @@ function App() {
   embCategoryColors(3);
   //일케일케
 
-  // load_len(url, data.name, data.points, numEmb)
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>

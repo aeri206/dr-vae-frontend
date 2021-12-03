@@ -76,7 +76,7 @@ const MainView = (props) => {
   useEffect(() => {
 
     (async() => {
-      await reload(url, dataset, pointNum).then(async dims => {
+      await reload(url, dataset, pointNum, idx).then(async dims => {
         await reconstruction(url, latentValues).then(async res => {
           emb = res;
   
@@ -96,7 +96,8 @@ const MainView = (props) => {
       
           latentEmb = latentEmbData.emb;
           latentLabel = latentEmbData.label;
-      
+          let latentVector = latentEmbData.vec;
+          
           latentColorData = latentLabel.map(idx => {
             const color = d3.rgb(embCategoryColors(idx));
             return [color.r, color.g, color.b];
@@ -105,8 +106,12 @@ const MainView = (props) => {
           [[0, 0, 0]].concat(latentColorData)
       
           latentcoor = latentKnnData.coor;
-          
-          const latentData = {
+
+          // 2D 일 경우, latentEmb대신에
+          //여기
+          console.log(dim)
+          let latentData;
+          latentData = {
             position: [latentKnnData.coor].concat(latentEmb),
             opacity: new Array(latentEmb.length + 1).fill(1),
             color: [[255, 255, 255]].concat(latentColorData),
@@ -114,7 +119,18 @@ const MainView = (props) => {
             borderColor: [[0, 0, 0]].concat(latentColorData),
             radius: [radius * 8].concat(new Array(latentEmb.length).fill(radius * 0.5)),
           }
-      
+
+          // if (dim == 2) {
+          //   latentData = {
+          //     position: [latentKnnData.coor].concat(latentVector),
+          //     opacity: new Array(latentEmb.length + 1).fill(1),
+          //     color: [[255, 255, 255]].concat(latentColorData),
+          //     border:[50].concat(new Array(latentEmb.length).fill(0)),
+          //     borderColor: [[0, 0, 0]].concat(latentColorData),
+          //     radius: [radius * 8].concat(new Array(latentEmb.length).fill(radius * 0.5)),
+          //   }
+
+          // }
       
           latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
           
@@ -184,6 +200,7 @@ const MainView = (props) => {
         position: [latentcoor].concat(latentEmb)
       }
 
+      // 여기
       latentViewSplot.update(latentData, 1000, 0);
 
     })();
@@ -223,6 +240,7 @@ const MainView = (props) => {
         position: [latentcoor].concat(latentEmb)
       }
 
+      //여기
       latentViewSplot.update(latentData, 1000, 0)
 
     })();

@@ -26,7 +26,20 @@
     "mammoth": [
         {
             "points": 5000,
-            "model": [{
+            "model": [
+                {
+                    "type": "VAE",
+                    "dim": 5,
+                    "idx": 0,
+                    "methods": ["tsne", "umap"]
+                },
+                {
+                    "type": "VAE",
+                    "dim": 2,
+                    "idx": 1,
+                    "methods": ["tsne", "umap"]
+                },
+                {
                 "type": "VAE",
                 "dim": 5,
                 "idx": 2,
