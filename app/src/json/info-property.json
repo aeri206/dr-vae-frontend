@@ -7,7 +7,29 @@
                     "type": "VAE",
                     "dim": 2,
                     "idx": 3,
-                    "methods": ["umap", "densmap", "isomap"]
+                    "methods": ["umap", "densmap", "isomap"],
+                    "variant": "method"
+                }
+            ]
+        }
+    ],
+    "housing": [
+        {
+            "points": 1032,
+            "model": [
+                {
+                    "type": "VAE",
+                    "dim": 2,
+                    "idx": 0,
+                    "methods": ["umap"],
+                    "variant": "weight"
+                },
+                {
+                    "type": "VAE",
+                    "dim": 5,
+                    "idx": 1,
+                    "methods": ["umap"],
+                    "variant": "weight"
                 }
             ]
         }
@@ -19,7 +41,8 @@
                 "type": "VAE", 
                 "dim": 2,
                 "idx": 5,
-                "methods": ["umap", "densmap", "isomap"]
+                "methods": ["umap", "densmap", "isomap"],
+                "variant": "method"
             }]
         }
     ],
@@ -31,35 +54,41 @@
                     "type": "VAE",
                     "dim": 5,
                     "idx": 0,
-                    "methods": ["tsne", "umap"]
+                    "methods": ["tsne", "umap"],
+                    "variant": "method"
                 },
                 {
                     "type": "VAE",
                     "dim": 2,
                     "idx": 1,
-                    "methods": ["tsne", "umap"]
+                    "methods": ["tsne", "umap"],
+                    "variant": "method"
                 },
                 {
                 "type": "VAE",
                 "dim": 5,
                 "idx": 2,
-                "methods": ["umap"]
+                "methods": ["umap"],
+                "variant": "method"
             },{
                 "type": "VAE",
                 "dim": 2,
                 "idx": 3,
-                "methods": ["umap"]
+                "methods": ["umap"],
+                "variant": "method"
 
             },{
                 "type": "VAE",
                 "dim": 5,
                 "idx": 6,
-                "methods": ["umap", "densmap", "isomap"]
+                "methods": ["umap", "densmap", "isomap"],
+                "variant": "method"
             },{
                 "type": "VAE",
                 "dim": 2,
                 "idx": 7,
-                "methods": ["umap", "densmap", "isomap"]
+                "methods": ["umap", "densmap", "isomap"],
+                "variant": "method"
             }]
         }
     ],
@@ -70,24 +99,27 @@
                 "type": "VAE",
                 "dim": 5,
                 "idx": 0,
-                "methods": ["tsne", "umap"]
+                "methods": ["tsne", "umap"],
+                "variant": "method"
             },{
                 "type": "VAE",
                 "dim": 2,
                 "idx": 1,
-                "methods": ["tsne", "umap"]
+                "methods": ["tsne", "umap"],
+                "variant": "method"
             },{
                 "type": "VAE",
                 "dim": 5,
                 "idx": 6,
-                "methods": ["umap", "densmap", "isomap"]
+                "methods": ["umap", "densmap", "isomap"],
+                "variant": "method"
             },{
                 "type": "VAE",
                 "dim": 2,
                 "idx": 7,
-                "methods": ["umap", "densmap", "isomap"]
+                "methods": ["umap", "densmap", "isomap"],
+                "variant": "method"
             }
-
             ]
         }
     ]

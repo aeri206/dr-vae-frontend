@@ -44,7 +44,7 @@ const SideBar = props => {
     const [len, setLen] = useState('');
 
     (async () => {
-      await getLatentEmb(props.url).then(res => {
+      await getLatentEmb(props.url, 0).then(res => {
         setLen(res.emb.length)
       })
     })();

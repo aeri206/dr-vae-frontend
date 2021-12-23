@@ -95,6 +95,7 @@ function App() {
   embCategoryColors(3);
   //일케일케
 
+  
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -161,6 +162,8 @@ function App() {
             margin={margin}
             methodsNum={methodsNum}
             dim={dim}
+            info={test}
+            data={data}
             // embCategoryColors={embCategoryColors}
             // labelColors={labelColors}
             // data={propsData}

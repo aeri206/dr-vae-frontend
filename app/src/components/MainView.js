@@ -11,7 +11,7 @@ import { getLatentEmb, reconstruction, getKnn, latentCoorToOthers, reload } from
 import { useParams } from "react-router-dom";
 // import { deepcopyArr } from '../helpers/utils';
 import ScrollBar from './subcomponents/ScrollBar';
-import { Paper, Box, Grid, Button, Typography, Divider } from '@mui/material';
+import { Paper, Box, Grid, Button, Typography, Divider, InputLabel, MenuItem, FormControl, Select } from '@mui/material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 
 
@@ -29,7 +29,10 @@ const MainView = (props) => {
   
   let labelColors = d3.scaleOrdinal(d3.schemeCategory10);
   let embCategoryColors = d3.scaleOrdinal(d3.schemeDark2);
+  let embWeightColors = d3.scaleSequential(d3.interpolateRdGy);
 
+  
+  
   embCategoryColors(0);
   embCategoryColors(1);
   embCategoryColors(2);
@@ -38,7 +41,20 @@ const MainView = (props) => {
 
   // CONSTANTs for managing layout / design
   
-  const { radius, size, margin, methodsNum, url, info, dim } = props;
+  const { radius, size, margin, methodsNum, url, info, data, dim } = props;
+
+  const model = info[data.name].find(p => p.points == data.points).model.find(m => m.idx == data.idx);
+  
+  const ifWeight = (model.variant == 'weight') ? 1 : 0;
+  
+  // load attribute list
+
+  let attrList;
+  if (ifWeight == '1'){
+    attrList = require(`../json/${dataset}-${pointNum.toString()}-attr.json`);
+  }
+
+
   
   const methods = Object.keys(methodsNum)
 
@@ -49,6 +65,7 @@ const MainView = (props) => {
   const latentViewRef = useRef(null);
   const simEmbSvgRef = useRef(null);
   const captureViewRef = useRef(null);
+  const weightAttrRef = useRef(null);
   
 
   let mainViewSplot, latentViewSplot;
@@ -64,19 +81,18 @@ const MainView = (props) => {
 		return [color.r, color.g, color.b];
 	});
 
-  let latentColorData;
 
   // CONSTANTs for components
   let simEmbBarChart;  
   let captureViewManage;
 
-  let latentEmb, latentLabel;
+  let latentEmb, latentLabel, weightVector, latentColorData;
   
   // NOTE Initial Embedding construction
   useEffect(() => {
 
     (async() => {
-      await reload(url, dataset, pointNum, idx).then(async dims => {
+      await reload(url, dataset, pointNum, idx).then(async() => {
         await reconstruction(url, latentValues).then(async res => {
           emb = res;
   
@@ -88,28 +104,28 @@ const MainView = (props) => {
             borderColor: colorData,
             radius: new Array(emb.length).fill(radius),
           }
-          // console.log(mainViewRef)
           mainViewSplot = new Scatterplot(data, mainViewRef.current);
           
-          const latentEmbData = await getLatentEmb(url);
+          const latentEmbData = await getLatentEmb(url, ifWeight);
           const latentKnnData = await getKnn(url, latentValues, -1);
       
           latentEmb = latentEmbData.emb;
           latentLabel = latentEmbData.label;
           let latentVector = latentEmbData.vec;
+          weightVector = latentEmbData.weight;
+          
+          // TODO : should be changed for weight value
           
           latentColorData = latentLabel.map(idx => {
             const color = d3.rgb(embCategoryColors(idx));
             return [color.r, color.g, color.b];
           });
       
-          [[0, 0, 0]].concat(latentColorData)
       
           latentcoor = latentKnnData.coor;
 
           // 2D 일 경우, latentEmb대신에
           //여기
-          console.log(dim)
           let latentData;
           latentData = {
             position: [latentKnnData.coor].concat(latentEmb),
@@ -132,9 +148,11 @@ const MainView = (props) => {
 
           // }
       
+          // TODO : 여기에 color
+          // should be update for weight
           latentViewSplot = new Scatterplot(latentData, latentViewRef.current);
           
-          // methods 다를떄 어떻게 할지 고민
+          // TODO : methods 다를떄 어떻게 할지 고민
           simEmbBarChart = new barChart(
             simEmbSvgRef, 
             size * 0.35, 
@@ -158,8 +176,9 @@ const MainView = (props) => {
   // NOTE for capture view
   useEffect(() => {
     captureViewManage = new CaptureViewManage(captureViewRef, pointNum, colorData);
-  });
+  }, []);
 
+  
   function captureCurrentEmbedding(e) {
     const currCaptureNum = captureViewManage.currentCaptureNum();
     if (currCaptureNum === 3) {
@@ -204,6 +223,38 @@ const MainView = (props) => {
       latentViewSplot.update(latentData, 1000, 0);
 
     })();
+  }
+
+  function weightAttrUpdate(e) {
+    if (e.target.value == -1){
+      latentColorData = latentLabel.map(idx => {
+        const color = d3.rgb(embCategoryColors(idx));
+        return [color.r, color.g, color.b];
+      });
+
+      const latentData = {
+        color: [[255, 255, 255]].concat(latentColorData),
+        borderColor: [[0, 0, 0]].concat(latentColorData)
+      }
+      latentViewSplot.update(latentData, 10, 0);
+
+    } else {
+      
+      const weightLatentLabel = weightVector.map(w => w[e.target.value])
+      let maxWeight = Math.max(...weightLatentLabel)
+      let weightLatentColorData = weightLatentLabel.map(idx => {
+        const color = d3.rgb(embWeightColors(idx/maxWeight));
+        return [color.r, color.g, color.b];
+      })
+      const latentData = {
+        color: [[255, 255, 255]].concat(weightLatentColorData),
+        borderColor: [[0, 0, 0]].concat(weightLatentColorData)
+      }
+      latentViewSplot.update(latentData, 10, 0);
+      
+
+    }
+
   }
 
   function mouseoverCapture(e) { e.target.style.border = "2px solid black"; }
@@ -354,7 +405,6 @@ const MainView = (props) => {
     })
 
   }, [props])
-  console.log('main')
   return (
     <Box component="div"
       sx={{width: size * 2.5,
@@ -414,9 +464,19 @@ const MainView = (props) => {
 
             }}
           ></canvas>
+          {ifWeight == 1 ? 
+          <select
+            class="form-select w-auto"
+            aria-label="Default select example"
+            onChange={weightAttrUpdate}>
+          <option selected value="-1">None of attribute selected</option>
+          {attrList.map((attr, idx) => 
+                  <option value={idx}>{attr}</option>
+                )}
+        </select>
+          : <></>}
           </div>
         </div>
-      {/* </div> */}
       </Paper>
       </Box>
   </Grid>

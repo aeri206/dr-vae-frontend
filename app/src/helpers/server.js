@@ -25,12 +25,13 @@ function embScale(embedding) {
 	});
 }
 
-export async function getLatentEmb(url) {
+export async function getLatentEmb(url, ifWeight) {
 	let data;
-	await axios.get(url + "getlatentemb").then(response => {
+	await axios.get(url + "getlatentemb", {
+		params: { ifWeight }
+	}).then(response => {
 		data = response.data;
 		data.vec = embScale(data.vec)
-		
 	})
 	return data;
 }
