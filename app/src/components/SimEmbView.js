@@ -23,7 +23,7 @@ const SimEmbView = props => {
 
   
   let { latentValues } = props;
-  const { size, url, n, colorData, restoreSimView, onUpdate } = props;
+  const { size, url, n, colorData, restoreSimView, getLatentValues } = props;
 
   
 
@@ -77,21 +77,18 @@ const SimEmbView = props => {
   }, [showRecon])
 
   
-  const onClick = (async(values) => {
+  const onClickUpdate = (async(values) => {
     
     latentValues = values.map((d, _) => d)
     
     const data = await getKnn(url, latentValues, n);
-    
     data.files.forEach((d, i) => {
-      console.log(d)
       originEmbeddings.current[i].current = embScale(d.emb);
       
       
       delete d.emb;
       d['method'] = methodsNum[data.labels[i]]
       originParams.current[i].current = d;
-      console.log(d)
     })
     
     
@@ -116,7 +113,6 @@ const SimEmbView = props => {
     }
     else { // construct
       
-      console.log('create')
       let sc  = data.embs.map((d, idx) => {
         // d; point_count, 2
         const sdata = {
@@ -159,10 +155,10 @@ const SimEmbView = props => {
                 variant="outlined"
                 sx={{margin: '5px'}}
                 onClick={() => {
-                  let x = onUpdate();
-                  onClick(x)
+                  let values = getLatentValues();
+                  onClickUpdate(values)
                 }}
-                // onClick={onClick}
+                // onClick={() => {console.log(onUpdate())}}
             >
                 Update</Button>
                 <Button

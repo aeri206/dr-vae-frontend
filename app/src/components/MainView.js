@@ -90,10 +90,12 @@ const MainView = (props) => {
   
   // NOTE Initial Embedding construction
   useEffect(() => {
-
     (async() => {
       await reload(url, dataset, pointNum, idx).then(async() => {
         await reconstruction(url, latentValues).then(async res => {
+          latentValues.forEach((val, i) => {
+            document.getElementById("latent" + i).value = val * 10;
+          });
           emb = res;
   
           const data = {
@@ -176,7 +178,7 @@ const MainView = (props) => {
   // NOTE for capture view
   useEffect(() => {
     captureViewManage = new CaptureViewManage(captureViewRef, pointNum, colorData);
-  }, []);
+  }, [params]);
 
   
   function captureCurrentEmbedding(e) {
@@ -298,7 +300,7 @@ const MainView = (props) => {
 
   }
 
-  const onUpdate = () => latentValues
+  const getLatentValues = () => {return latentValues}
   
   function updateLatentValue(e) {
     const latentIdx = parseInt(e.target.id.slice(6));  // get the current latent value attribute number
@@ -576,7 +578,7 @@ const MainView = (props) => {
         n={8}
         latentValues={latentValues}
         restoreSimView={restoreSimView}
-        onUpdate={onUpdate}
+        getLatentValues={getLatentValues}
         url={url}
       />
       </Grid>
